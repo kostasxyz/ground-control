@@ -172,10 +172,10 @@ export function GitDiffPane({ worktreePath, source, file }: GitDiffPaneProps) {
         </span>
       </div>
 
-      <div className="flex-1 p-4 font-terminal text-body-sm">
+      <div className="flex-1 p-4 font-terminal text-terminal">
         {diff.hunks.map((hunk, hunkIndex) => (
           <div key={hunkIndex} className="mb-5 overflow-hidden rounded-md border border-line-soft bg-term-bg">
-            <div className="border-b border-line-soft bg-cream-ghost/10 px-3 py-1.5 text-body-2xs text-cream-ghost">
+            <div className="border-b border-line-soft bg-cream-ghost/10 px-3 py-1.5 text-terminal text-cream-ghost">
               @@ -{hunk.oldStart},{hunk.oldCount} +{hunk.newStart},{hunk.newCount} @@
               {hunk.header ? ` ${hunk.header}` : ''}
             </div>
@@ -187,7 +187,7 @@ export function GitDiffPane({ worktreePath, source, file }: GitDiffPaneProps) {
                   <div
                     key={lineIndex}
                     className={cn(
-                      'grid grid-cols-[44px_44px_1fr] gap-2 px-2 py-0.5 text-body-2xs leading-5',
+                      'grid grid-cols-[44px_44px_1fr] gap-2 px-2 py-0.5 text-terminal leading-normal',
                       added && 'bg-teal/8',
                       deleted && 'bg-ember/8'
                     )}

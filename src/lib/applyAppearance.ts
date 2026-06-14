@@ -115,6 +115,8 @@ export function applyAppearance(raw: Settings): void {
   // Real monospace var so non-terminal surfaces (e.g. the diff viewer) can share
   // the terminal's font; --mono stays a body-fold back-compat alias.
   root.style.setProperty('--terminal-font', terminalFamily)
+  // Paired size var so those surfaces track the terminal's size too, not the UI body.
+  root.style.setProperty('--terminal-font-size', `${settings.terminalFontSize}px`)
 
   // Back-compat aliases (mono/stencil fold into body).
   root.style.setProperty('--display', headingFamily)

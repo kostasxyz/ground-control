@@ -36,6 +36,11 @@
   --font-terminal: var(--terminal-font);
   --font-stencil: var(--stencil-font);
 
+  /* Terminal font size as a text utility (text-terminal); tracks
+     settings.terminalFontSize so code surfaces (diff viewer) match the
+     terminal, like font-terminal matches its family. */
+  --text-terminal: var(--terminal-font-size);
+
   /* Semantic text scale: same ratios as tokens.css (body 13px, heading 18px). */
   --text-body-xs: calc(var(--font-body-size) * 0.7692307692);
   --text-body-2xs: calc(var(--font-body-size) * 0.8461538462);
