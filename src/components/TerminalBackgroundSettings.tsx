@@ -26,7 +26,6 @@ const PREVIEW_ANSI_KEYS = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan'] 
 const previewLine = 'truncate'
 
 export function TerminalBackgroundSettings({ settings, patchSettings }: Props) {
-  const colorInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -123,20 +122,25 @@ export function TerminalBackgroundSettings({ settings, patchSettings }: Props) {
       <div className={settingsRow}>
         <span className={settingsLabel}>Background color</span>
         <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            className="h-10 w-10 cursor-pointer rounded-lg border-[0.5px] border-cream/20 p-0 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] hover:border-orange/45"
-            title="Pick background color"
-            style={{ backgroundColor: resolvedColor }}
-            onClick={() => colorInputRef.current?.click()}
-          />
-          <input
-            ref={colorInputRef}
-            type="color"
-            className="pointer-events-none absolute h-0 w-0 opacity-0"
-            value={resolvedColor}
-            onChange={(e) => patchSettings({ terminalBackgroundColor: e.target.value })}
-          />
+          {/* The real <input type="color"> is the swatch: a transparent overlay
+              over the colored preview. A genuine click on it opens the native
+              picker reliably — a hidden, zero-size, pointer-events:none input
+              triggered via .click() does not in Chromium/Electron. */}
+          <div className="group relative h-10 w-10">
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 rounded-lg border-[0.5px] border-cream/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] group-hover:border-orange/45"
+              style={{ backgroundColor: resolvedColor }}
+            />
+            <input
+              type="color"
+              aria-label="Terminal background color"
+              title="Pick background color"
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+              value={resolvedColor.toLowerCase()}
+              onChange={(e) => patchSettings({ terminalBackgroundColor: e.target.value })}
+            />
+          </div>
           {settings.terminalBackgroundColor && (
             <button
               type="button"
