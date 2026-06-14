@@ -3,9 +3,9 @@
 import type { ColorScheme } from './theme'
 import type { TerminalThemeId } from './terminalThemes'
 
-export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light'
+export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light' | 'synthwave'
 
-export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord'
+export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord' | 'synthwave'
 
 export const APP_THEME_ORDER = [
   'ground-control-dark',
@@ -17,7 +17,8 @@ export const APP_THEME_ORDER = [
   'claude',
   'claude-dark',
   'nord',
-  'nord-light'
+  'nord-light',
+  'synthwave'
 ] as const satisfies readonly AppThemeId[]
 
 export const DEFAULT_APP_THEME_ID: AppThemeId = 'ground-control-dark'
@@ -121,6 +122,16 @@ const APP_THEMES: Record<AppThemeId, AppTheme> = {
     scheme: 'light',
     terminalPair: 'nord-light',
     surface: '#ECEFF4'
+  },
+  // Synthwave — electronic neon-on-black 80s retrowave palette. Dark-only, so
+  // pairedAppTheme() keeps it when the OS flips to light (no synthwave-light
+  // sibling). Hot pink (#F6188F) accent anchors the UI.
+  synthwave: {
+    label: 'Synthwave',
+    family: 'synthwave',
+    scheme: 'dark',
+    terminalPair: 'synthwave',
+    surface: '#0A0A0E'
   }
 }
 

@@ -371,3 +371,37 @@
   --term-background: #e5e9f0;
   --statusbar-bg: rgba(229, 233, 240, 0.75);
 }
+
+/* Synthwave — electronic neon-on-black 80s retrowave distinct palette.
+   Dark-only, so pairedAppTheme() keeps it when the OS flips to light (no
+   synthwave-light sibling). Pure black background #000000, accent hot pink
+   #F6188F, neon cyan #19CDE6 for cursor/selection. */
+:root[data-app-theme='synthwave'] {
+  --bg: #000000;
+  --surface: #0a0a0e;
+  --surface-2: #121218;
+  --rail: rgba(0, 0, 0, 0.85);
+  --sidebar: rgba(10, 10, 14, 0.72);
+  --orange: #f6188f; /* primary accent — hot pink neon */
+  --orange-bright: #f73ba0;
+  --orange-deep: #d1147a;
+  --ember: #f85a21; /* hot/danger — orange-red */
+  --gold: #fdf834; /* neon yellow */
+  --teal: #19cde6; /* neon cyan */
+  --cream: #dad9c7; /* primary text — warm off-white */
+  --cream-dim: #a89db8;
+  --cream-ghost: #7f7094;
+  --line: rgba(246, 24, 143, 0.15);
+  --line-soft: rgba(218, 217, 199, 0.08);
+  --line-dark: #050508; /* recessed edge, darker than --surface */
+  --glow: rgba(246, 24, 143, 0.45);
+  --glow-soft: rgba(246, 24, 143, 0.2);
+  --shadow-card: 0 2px 6px -2px rgba(246, 24, 143, 0.18);
+  --highlight-top: rgba(246, 24, 143, 0.05);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(18, 18, 24, 0.55), rgba(0, 0, 0, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(10, 10, 14, 0.4), rgba(0, 0, 0, 0.3));
+  --term-frame: rgba(0, 0, 0, 0.6);
+  --term-background: #000000;
+  --statusbar-bg: rgba(0, 0, 0, 0.6);
+}

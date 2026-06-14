@@ -15,6 +15,7 @@ export type TerminalThemeId =
   | 'claude-dark'
   | 'nord'
   | 'nord-light'
+  | 'synthwave'
 export const TERMINAL_THEME_ORDER = [
   'ember-dark',
   'ember-light',
@@ -27,7 +28,8 @@ export const TERMINAL_THEME_ORDER = [
   'claude',
   'claude-dark',
   'nord',
-  'nord-light'
+  'nord-light',
+  'synthwave'
 ] as const satisfies readonly TerminalThemeId[]
 
 export const DEFAULT_TERMINAL_THEME_ID: TerminalThemeId = 'ember-dark'
@@ -70,7 +72,8 @@ const TERMINAL_THEME_LABELS: Record<TerminalThemeId, string> = {
   claude: 'Claude',
   'claude-dark': 'Claude Dark',
   nord: 'Nord',
-  'nord-light': 'Nord Light'
+  'nord-light': 'Nord Light',
+  synthwave: 'Synthwave'
 }
 
 const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
@@ -362,6 +365,33 @@ const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
     brightMagenta: '#B48EAD',
     brightCyan: '#8FBCBB',
     brightWhite: '#ECEFF4'
+  },
+  // Synthwave — electronic neon-on-black 80s retrowave palette. Pure black
+  // background, hot pink #F6188F primary, cyan #19CDE6 cursor/selection.
+  // Dark-only (no light sibling).
+  synthwave: {
+    background: '#000000',
+    foreground: '#DAD9C7',
+    cursor: '#19CDE6',
+    cursorAccent: '#000000',
+    selectionBackground: '#19CDE6',
+    selectionForeground: '#000000',
+    black: '#000000',
+    red: '#F6188F',
+    green: '#1EBB2B',
+    yellow: '#FDF834',
+    blue: '#2186EC',
+    magenta: '#F85A21',
+    cyan: '#12C3E2',
+    white: '#FFFFFF',
+    brightBlack: '#7F7094',
+    brightRed: '#F841A0',
+    brightGreen: '#25C141',
+    brightYellow: '#FDF454',
+    brightBlue: '#2F9DED',
+    brightMagenta: '#F97137',
+    brightCyan: '#19CDE6',
+    brightWhite: '#FFFFFF'
   }
 }
 
