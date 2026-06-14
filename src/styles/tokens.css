@@ -303,3 +303,71 @@
   --term-background: #1a1a1e;
   --statusbar-bg: rgba(26, 26, 30, 0.6);
 }
+
+/* Nord — arctic, north-bluish distinct palette. Dark sibling of the Nord
+   family, flips with the OS alongside the light variant. Background #2E3440
+   (nord0), foreground #D8DEE9 (nord4), accent Frost #88C0D0 — the canonical
+   Nord Polar Night / Snow Storm / Frost / Aurora palette. */
+:root[data-app-theme='nord'] {
+  --bg: #2e3440;
+  --surface: #3b4252;
+  --surface-2: #434c5e;
+  --rail: rgba(46, 52, 64, 0.85);
+  --sidebar: rgba(59, 66, 82, 0.72);
+  --orange: #88c0d0; /* primary accent — Frost */
+  --orange-bright: #9bc9d7;
+  --orange-deep: #5e81ac;
+  --ember: #bf616a; /* hot/danger — Aurora red */
+  --gold: #ebcb8b;
+  --teal: #8fbcbb;
+  --cream: #d8dee9; /* primary text */
+  --cream-dim: #9aa3b2;
+  --cream-ghost: #5e6573;
+  --line: rgba(136, 192, 208, 0.15);
+  --line-soft: rgba(216, 222, 233, 0.08);
+  --line-dark: #1e242f; /* recessed edge, darker than --bg */
+  --glow: rgba(136, 192, 208, 0.5);
+  --glow-soft: rgba(136, 192, 208, 0.22);
+  --shadow-card: 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --highlight-top: rgba(136, 192, 208, 0.05);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(67, 76, 94, 0.55), rgba(46, 52, 64, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(59, 66, 82, 0.4), rgba(46, 52, 64, 0.3));
+  --term-frame: rgba(30, 36, 47, 0.6);
+  --term-background: #2e3440;
+  --statusbar-bg: rgba(46, 52, 64, 0.6);
+}
+
+/* Nord Light — light sibling of the Nord family. Snow-storm background #E5E9F0
+   (nord5), foreground #2E3440 (nord0 ink), accent Frost #5E81AC (deeper for
+   contrast on light). Flips with the OS alongside the dark Nord variant.
+   Terminal pairing: nord-light. */
+:root[data-app-theme='nord-light'] {
+  --bg: #e5e9f0;
+  --surface: #eceff4;
+  --surface-2: #d8dee9;
+  --rail: rgba(229, 233, 240, 0.88);
+  --sidebar: rgba(236, 239, 244, 0.78);
+  --orange: #5e81ac; /* primary accent — Frost (deeper for contrast) */
+  --orange-bright: #7694b8;
+  --orange-deep: #506e92;
+  --ember: #b04e57; /* hot/danger — Aurora red, deepened for light contrast */
+  --gold: #a17d1c; /* deepened nord yellow — #ebcb8b washes out on snow-storm bg */
+  --teal: #36717c; /* deepened frost/teal — readable as +insertions text on light */
+  --cream: #2e3440; /* primary text → dark ink */
+  --cream-dim: #4c566a;
+  --cream-ghost: #7b8595;
+  --line: rgba(94, 129, 172, 0.25);
+  --line-soft: rgba(46, 52, 64, 0.12);
+  --line-dark: #cbd3dd; /* recessed edge */
+  --glow: rgba(94, 129, 172, 0.35);
+  --glow-soft: rgba(94, 129, 172, 0.18);
+  --shadow-card: 0 2px 6px -2px rgba(80, 50, 20, 0.2);
+  --highlight-top: rgba(255, 255, 255, 0.6);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(236, 239, 244, 0.85), rgba(229, 233, 240, 0.5));
+  --grad-content: linear-gradient(180deg, rgba(236, 239, 244, 0.5), rgba(229, 233, 240, 0.35));
+  --term-frame: rgba(60, 50, 40, 0.1);
+  --term-background: #e5e9f0;
+  --statusbar-bg: rgba(229, 233, 240, 0.75);
+}

@@ -3,9 +3,9 @@
 import type { ColorScheme } from './theme'
 import type { TerminalThemeId } from './terminalThemes'
 
-export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark'
+export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light'
 
-export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude'
+export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord'
 
 export const APP_THEME_ORDER = [
   'ground-control-dark',
@@ -15,7 +15,9 @@ export const APP_THEME_ORDER = [
   'rose-pine-dawn',
   'matrix',
   'claude',
-  'claude-dark'
+  'claude-dark',
+  'nord',
+  'nord-light'
 ] as const satisfies readonly AppThemeId[]
 
 export const DEFAULT_APP_THEME_ID: AppThemeId = 'ground-control-dark'
@@ -102,6 +104,23 @@ const APP_THEMES: Record<AppThemeId, AppTheme> = {
     scheme: 'dark',
     terminalPair: 'claude-dark',
     surface: '#222226'
+  },
+  // Nord family — arctic, north-bluish palette. Dark/light pair that flips
+  // with the OS scheme, same as the ground-control and rose-pine families.
+  // Frost #88C0D0 anchors the dark UI; Snow Storm #ECEFF4 the light UI.
+  nord: {
+    label: 'Nord',
+    family: 'nord',
+    scheme: 'dark',
+    terminalPair: 'nord',
+    surface: '#3B4252'
+  },
+  'nord-light': {
+    label: 'Nord Light',
+    family: 'nord',
+    scheme: 'light',
+    terminalPair: 'nord-light',
+    surface: '#ECEFF4'
   }
 }
 

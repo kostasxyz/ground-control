@@ -13,6 +13,8 @@ export type TerminalThemeId =
   | 'matrix'
   | 'claude'
   | 'claude-dark'
+  | 'nord'
+  | 'nord-light'
 export const TERMINAL_THEME_ORDER = [
   'ember-dark',
   'ember-light',
@@ -23,7 +25,9 @@ export const TERMINAL_THEME_ORDER = [
   'rose-pine-dawn',
   'matrix',
   'claude',
-  'claude-dark'
+  'claude-dark',
+  'nord',
+  'nord-light'
 ] as const satisfies readonly TerminalThemeId[]
 
 export const DEFAULT_TERMINAL_THEME_ID: TerminalThemeId = 'ember-dark'
@@ -64,7 +68,9 @@ const TERMINAL_THEME_LABELS: Record<TerminalThemeId, string> = {
   'rose-pine-dawn': 'Rose Pine Dawn',
   matrix: 'Matrix',
   claude: 'Claude',
-  'claude-dark': 'Claude Dark'
+  'claude-dark': 'Claude Dark',
+  nord: 'Nord',
+  'nord-light': 'Nord Light'
 }
 
 const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
@@ -301,6 +307,61 @@ const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
     brightMagenta: '#4EAAAA',
     brightCyan: '#CAC8C0',
     brightWhite: '#F5F3EE'
+  },
+  // Nord — arctic, north-bluish palette (Polar Night / Snow Storm / Frost /
+  // Aurora). Dark sibling of the Nord family. Anchors: background #2E3440
+  // (nord0), foreground #D8DEE9 (nord4), frost #88C0D0. The canonical Nord
+  // 16-colour scheme.
+  nord: {
+    background: '#2E3440',
+    foreground: '#D8DEE9',
+    cursor: '#ECEFF4',
+    cursorAccent: '#2E3440',
+    selectionBackground: '#ECEFF4',
+    selectionForeground: '#4C566A',
+    black: '#3B4252',
+    red: '#BF616A',
+    green: '#A3BE8C',
+    yellow: '#EBCB8B',
+    blue: '#81A1C1',
+    magenta: '#B48EAD',
+    cyan: '#88C0D0',
+    white: '#E5E9F0',
+    brightBlack: '#4C566A',
+    brightRed: '#BF616A',
+    brightGreen: '#A3BE8C',
+    brightYellow: '#EBCB8B',
+    brightBlue: '#81A1C1',
+    brightMagenta: '#B48EAD',
+    brightCyan: '#8FBCBB',
+    brightWhite: '#ECEFF4'
+  },
+  // Nord Light — light sibling of the Nord family. Snow-storm background
+  // #E5E9F0 (nord5) with the same Frost/Aurora accents; flips with the OS
+  // scheme alongside the dark Nord variant.
+  'nord-light': {
+    background: '#E5E9F0',
+    foreground: '#414858',
+    cursor: '#88C0D0',
+    cursorAccent: '#3B4252',
+    selectionBackground: '#D8DEE9',
+    selectionForeground: '#4C566A',
+    black: '#3B4252',
+    red: '#BF616A',
+    green: '#A3BE8C',
+    yellow: '#EBCB8B',
+    blue: '#81A1C1',
+    magenta: '#B48EAD',
+    cyan: '#88C0D0',
+    white: '#D8DEE9',
+    brightBlack: '#4C566A',
+    brightRed: '#BF616A',
+    brightGreen: '#A3BE8C',
+    brightYellow: '#EBCB8B',
+    brightBlue: '#81A1C1',
+    brightMagenta: '#B48EAD',
+    brightCyan: '#8FBCBB',
+    brightWhite: '#ECEFF4'
   }
 }
 
