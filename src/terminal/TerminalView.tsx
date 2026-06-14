@@ -1,0 +1,57 @@
+import { useEffect } from 'react'
+import type { Session } from '@shared/types'
+import { useStore } from '@/state/store'
+import { PLACEHOLDER_TITLE } from '@/lib/constants'
+import { useTerminal } from './useTerminal'
+
+interface Props {
+  session: Session
+  active: boolean
+}
+
+/**
+ * One live terminal. Stays mounted (hidden when inactive) so switching is
+ * instant; unmounting tears the PTY down. Bridges terminal lifecycle events
+ * back into the store.
+ */
+export function TerminalView({ session, active }: Props) {
+  const markStarted = useStore((s) => s.markStarted)
+  const markRunning = useStore((s) => s.markRunning)
+  const markExited = useStore((s) => s.markExited)
+  const setError = useStore((s) => s.setError)
+  const refreshTitle = useStore((s) => s.refreshTitle)
+
+  const ref = useTerminal({
+    id: session.id,
+    cwd: session.cwd,
+    agent: session.agent,
+    agentSessionId: session.agentSessionId,
+    mode: session.started ? 'resume' : 'new',
+    active,
+    onStarted: () => markStarted(session.id),
+    onReveal: () => markRunning(session.id),
+    onExit: () => markExited(session.id),
+    onError: (message) => setError(session.id, message)
+  })
+
+  // Until the transcript reveals the first prompt, poll for a real title.
+  const title = session.title
+  const sessionId = session.id
+  useEffect(() => {
+    if (title !== PLACEHOLDER_TITLE) return
+    let tries = 0
+    const iv = setInterval(() => {
+      tries += 1
+      void refreshTitle(sessionId)
+      if (tries >= 8) clearInterval(iv)
+    }, 3000)
+    return () => clearInterval(iv)
+  }, [title, sessionId, refreshTitle])
+
+  return (
+    <div className="absolute inset-0 z-[2] flex" style={{ display: active ? 'flex' : 'none' }}>
+      {/* .term-host scopes the xterm sizing overrides in global.css */}
+      <div className="term-host relative min-w-0 flex-1 overflow-hidden px-2.5 py-2" ref={ref} />
+    </div>
+  )
+}

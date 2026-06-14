@@ -1,0 +1,37 @@
+import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
+import type { ComponentProps } from 'react'
+import { cn } from '@/lib/cn'
+
+/**
+ * ------------------------------------------------
+ * Styled Base UI Tooltip parts (ADR-008-08). `Provider` wraps the app root
+ * once for shared delay grouping; `Popup` bundles Portal + Positioner so
+ * consumers compose Root > Trigger + Popup.
+ */
+
+function Popup({ className, children, ...props }: ComponentProps<typeof BaseTooltip.Popup>) {
+  return (
+    <BaseTooltip.Portal>
+      {/* z-50: tooltips must paint above dialog backdrops (also z-50; the
+          body-level portal wins on document order). */}
+      <BaseTooltip.Positioner sideOffset={6} className="z-50">
+        <BaseTooltip.Popup
+          className={cn(
+            'rounded-md border-[0.5px] border-orange/40 bg-linear-160/srgb from-surface-2 to-surface px-2 py-1 text-body-2xs text-cream shadow-[0_16px_40px_-16px_rgba(0,0,0,0.7)]',
+            className
+          )}
+          {...props}
+        >
+          {children}
+        </BaseTooltip.Popup>
+      </BaseTooltip.Positioner>
+    </BaseTooltip.Portal>
+  )
+}
+
+export const Tooltip = {
+  Provider: BaseTooltip.Provider,
+  Root: BaseTooltip.Root,
+  Trigger: BaseTooltip.Trigger,
+  Popup
+}

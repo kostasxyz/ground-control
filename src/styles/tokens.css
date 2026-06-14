@@ -1,0 +1,305 @@
+/* Theme tokens (PLAN §9). A theme = this set of values; switching swaps them
+   on :root. Ported verbatim from _docs/assets/groundcontrol.html. The xterm
+   palette is a separate JS object (see terminal/xtermTheme.ts). */
+:root {
+  --bg: #1a120c;
+  --surface: #241811;
+  --surface-2: #2c1d13;
+  --rail: rgba(20, 13, 8, 0.85);
+  --sidebar: rgba(34, 20, 12, 0.72);
+  --orange: #ff8636;
+  --orange-bright: #ffa860;
+  --orange-deep: #e0641a;
+  --ember: #ff5e3a;
+  --gold: #f5b042;
+  --teal: #5fd6c2;
+  --cream: #f3e3d0;
+  --cream-dim: #c0a892;
+  --cream-ghost: #8a725d;
+  --line: rgba(255, 134, 54, 0.15);
+  --line-soft: rgba(243, 227, 208, 0.08);
+  --line-dark: #100a05; /* recessed edge, darker than --bg (e.g. unselected cards) */
+  --glow: rgba(255, 134, 54, 0.5);
+  --glow-soft: rgba(255, 134, 54, 0.22); /* subtler selection glow */
+  --shadow-card: 0 2px 6px -2px rgba(0, 0, 0, 0.45); /* neutral card elevation, no glow */
+  --highlight-top: rgba(255, 168, 96, 0.06); /* warm top-edge inset light */
+
+  /* Structural surfaces (PLAN §10) — themeable so the light scheme can override
+     them. Base values are the original warm-dark literals from global.css. */
+  --grad-titlebar: linear-gradient(180deg, rgba(58, 39, 24, 0.55), rgba(36, 24, 17, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(36, 24, 17, 0.4), rgba(20, 13, 8, 0.3));
+  --term-frame: rgba(13, 8, 5, 0.6); /* structural terminal frame (border chrome) */
+  --term-background: #0e0907; /* content backdrop; applyAppearance() overrides at runtime */
+  --term-bg-image: none;
+  --term-bg-opacity: 0.33;
+  --statusbar-bg: rgba(20, 13, 8, 0.6);
+
+  --sf: var(--font-body-family);
+  --display: var(--font-heading-family);
+  --mono: var(--font-body-family);
+  --stencil-font: var(--font-body-family);
+
+  /* Appearance-driven typography (RFC §9). applyAppearance() sets these at runtime. */
+  --font-heading-family: 'Unbounded', sans-serif;
+  --font-heading-size: 18px;
+  --font-body-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  --font-body-size: 13px;
+  /* Real monospace stack (the terminal's font); applyAppearance() overrides at
+     runtime to match settings.terminalFontFamily. Unlike --mono, not a body fold. */
+  --terminal-font: 'Space Mono', ui-monospace, Menlo, monospace;
+
+  /* Semantic text scale (ratios from defaults: body 13px, heading 18px). */
+  --text-body-xs: calc(var(--font-body-size) * 0.7692307692);
+  --text-body-2xs: calc(var(--font-body-size) * 0.8461538462);
+  --text-body-sm: calc(var(--font-body-size) * 0.9230769231);
+  --text-body-sm-plus: calc(var(--font-body-size) * 0.9615384615);
+  --text-body: var(--font-body-size);
+  --text-body-md: calc(var(--font-body-size) * 1.0769230769);
+  --text-body-lg: calc(var(--font-body-size) * 1.1538461538);
+  --text-heading-2xs: calc(var(--font-heading-size) * 0.7222222222);
+  --text-heading-sm: calc(var(--font-heading-size) * 0.8888888889);
+  --text-heading: var(--font-heading-size);
+  --text-heading-md: calc(var(--font-heading-size) * 1.1111111111);
+  --text-heading-lg: calc(var(--font-heading-size) * 1.4444444444);
+  --text-heading-xl: calc(var(--font-heading-size) * 1.5555555556);
+  --text-heading-display: calc(var(--font-heading-size) * 1.6666666667);
+}
+
+/* Light scheme (PLAN §10). applyTheme() sets data-theme='light' on <html>; this
+   block overrides color/surface tokens only — typography vars are scheme-neutral.
+   Warm paper + dark ink, ember accent retained (darkened so it reads on light).
+   Tokens stay color-named (--cream = text), so values are "inverted meaning". */
+:root[data-theme='light'] {
+  --bg: #f4ead9;
+  --surface: #fcf5ea;
+  --surface-2: #fffaf2;
+  --rail: rgba(244, 234, 217, 0.88);
+  --sidebar: rgba(252, 245, 234, 0.78);
+  --orange: #c25a14;
+  --orange-bright: #d86a1e;
+  --orange-deep: #a64c0e;
+  --ember: #d8472a;
+  --gold: #b9821a;
+  --teal: #1f9e8b;
+  --cream: #2a1c12; /* primary text → dark ink */
+  --cream-dim: #5c4a38;
+  --cream-ghost: #8a725d;
+  --line: rgba(194, 90, 20, 0.25);
+  --line-soft: rgba(42, 28, 18, 0.12);
+  --line-dark: #e6d7c2; /* recessed edge, lighter than --bg on light */
+  --glow: rgba(194, 90, 20, 0.35);
+  --glow-soft: rgba(194, 90, 20, 0.18);
+  --shadow-card: 0 2px 6px -2px rgba(80, 50, 20, 0.2);
+  --highlight-top: rgba(255, 255, 255, 0.6);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(255, 250, 242, 0.85), rgba(244, 234, 217, 0.5));
+  --grad-content: linear-gradient(180deg, rgba(252, 245, 234, 0.5), rgba(244, 234, 217, 0.35));
+  --term-frame: rgba(60, 40, 22, 0.1);
+  --term-background: #fbf3e7;
+  --statusbar-bg: rgba(244, 234, 217, 0.75);
+}
+
+/* Ayu Dark. A *distinct* palette, not a ground-control recolor — plan 010
+   ADR-002 deferred this to "a second CSS axis beyond [data-theme]", which this
+   is: applyTheme() sets data-app-theme on <html> and this block overrides the
+   color/surface tokens only (typography stays scheme-neutral). Dark scheme, so
+   data-theme='dark' and the light block never matches. Anchors: accent #E6B450,
+   background #0B0E14, foreground #BFBDB6 — the official Ayu Dark palette (shares
+   the 'ayu' terminal palette's colours). */
+:root[data-app-theme='ayu-dark'] {
+  --bg: #0b0e14;
+  --surface: #0e131b;
+  --surface-2: #131922;
+  --rail: rgba(7, 9, 14, 0.85);
+  --sidebar: rgba(14, 19, 27, 0.72);
+  --orange: #e6b450; /* primary accent — the Ayu yellow */
+  --orange-bright: #f2c879;
+  --orange-deep: #d09a2e;
+  --ember: #f07178; /* hot/danger secondary — Ayu red */
+  --gold: #ffb454;
+  --teal: #90e1c6; /* Ayu cyan */
+  --cream: #bfbdb6; /* primary text */
+  --cream-dim: #8c8a83;
+  --cream-ghost: #5c6773;
+  --line: rgba(230, 180, 80, 0.15);
+  --line-soft: rgba(191, 189, 182, 0.08);
+  --line-dark: #06080c; /* recessed edge, darker than --bg */
+  --glow: rgba(230, 180, 80, 0.5);
+  --glow-soft: rgba(230, 180, 80, 0.2);
+  --shadow-card: 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --highlight-top: rgba(230, 180, 80, 0.05);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(19, 25, 34, 0.55), rgba(11, 14, 20, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(14, 19, 27, 0.4), rgba(11, 14, 20, 0.3));
+  --term-frame: rgba(5, 7, 11, 0.6);
+  --term-background: #0b0e14;
+  --statusbar-bg: rgba(11, 14, 20, 0.6);
+}
+
+/* Rose Pine. A *distinct* palette, not a ground-control recolor — follows the
+   same pattern as ayu-dark (dark-only, no light sibling). Applies when
+   data-app-theme='rose-pine' on <html>. Dark scheme, so data-theme='dark' and
+   the light block never matches. Anchors: accent Iris #C4A7E7, background
+   #191724, foreground #E0DEF4 — the official Rose Pine palette. */
+:root[data-app-theme='rose-pine'] {
+  --bg: #191724;
+  --surface: #1f1d2e;
+  --surface-2: #26233a;
+  --rail: rgba(25, 23, 36, 0.85);
+  --sidebar: rgba(31, 29, 46, 0.72);
+  --orange: #c4a7e7; /* primary accent — Iris */
+  --orange-bright: #d4bcf0;
+  --orange-deep: #a184c4;
+  --ember: #eb6f92; /* hot/danger — Love */
+  --gold: #f6c177;
+  --teal: #9ccfd8; /* Foam */
+  --cream: #e0def4; /* primary text */
+  --cream-dim: #908caa; /* Subtle */
+  --cream-ghost: #6e6a86; /* Muted */
+  --line: rgba(196, 167, 231, 0.15);
+  --line-soft: rgba(224, 222, 244, 0.08);
+  --line-dark: #100e1a;
+  --glow: rgba(196, 167, 231, 0.5);
+  --glow-soft: rgba(196, 167, 231, 0.22);
+  --shadow-card: 0 2px 6px -2px rgba(0, 0, 0, 0.45);
+  --highlight-top: rgba(212, 188, 240, 0.05);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(38, 35, 58, 0.55), rgba(25, 23, 36, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(31, 29, 46, 0.4), rgba(25, 23, 36, 0.3));
+  --term-frame: rgba(14, 12, 22, 0.6);
+  --term-background: #191724;
+  --statusbar-bg: rgba(25, 23, 36, 0.6);
+}
+
+/* Rose Pine Dawn — light variant of the Rose Pine family. Light scheme, so
+   data-theme='light' (the dark block never matches). Background #FAF4ED,
+   foreground #575279, accent Iris #907AA9 — the official Rose Pine Dawn
+   palette. Terminal pairing: rose-pine-dawn. */
+:root[data-app-theme='rose-pine-dawn'] {
+  --bg: #faf4ed;
+  --surface: #fffaf3;
+  --surface-2: #f2e9de;
+  --rail: rgba(250, 244, 237, 0.88);
+  --sidebar: rgba(255, 250, 243, 0.78);
+  --orange: #907aa9; /* primary accent — Iris (light) */
+  --orange-bright: #a490bd;
+  --orange-deep: #7a6693;
+  --ember: #b4637a; /* hot/danger — Love */
+  --gold: #ea9d34;
+  --teal: #56949f; /* Foam */
+  --cream: #575279; /* primary text */
+  --cream-dim: #797593; /* Subtle */
+  --cream-ghost: #9893a5; /* Muted */
+  --line: rgba(144, 122, 169, 0.25);
+  --line-soft: rgba(87, 82, 121, 0.12);
+  --line-dark: #e8dfd6;
+  --glow: rgba(144, 122, 169, 0.35);
+  --glow-soft: rgba(144, 122, 169, 0.18);
+  --shadow-card: 0 2px 6px -2px rgba(80, 50, 20, 0.2);
+  --highlight-top: rgba(255, 255, 255, 0.6);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(255, 250, 243, 0.85), rgba(250, 244, 237, 0.5));
+  --grad-content: linear-gradient(180deg, rgba(255, 250, 243, 0.5), rgba(250, 244, 237, 0.35));
+  --term-frame: rgba(60, 50, 40, 0.1);
+  --term-background: #faf4ed;
+  --statusbar-bg: rgba(250, 244, 237, 0.75);
+}
+
+/* Matrix — green-on-black distinct palette. Dark-only (no light sibling),
+   same behaviour as ayu-dark. Background #0F191C, foreground #426644, accent
+   green #82D967 — the classic Matrix palette. */
+:root[data-app-theme='matrix'] {
+  --bg: #0f191c;
+  --surface: #152228;
+  --surface-2: #1a2a2e;
+  --rail: rgba(15, 25, 28, 0.85);
+  --sidebar: rgba(21, 34, 40, 0.72);
+  --orange: #82d967; /* primary accent — Matrix green */
+  --orange-bright: #90d762;
+  --orange-deep: #5b9e3f;
+  --ember: #2fc079; /* hot/danger — bright matrix green */
+  --gold: #ffd700;
+  --teal: #50b45a;
+  --cream: #426644; /* primary text */
+  --cream-dim: #507350;
+  --cream-ghost: #688060;
+  --line: rgba(130, 217, 103, 0.15);
+  --line-soft: rgba(66, 102, 68, 0.08);
+  --line-dark: #0a1214;
+  --glow: rgba(130, 217, 103, 0.5);
+  --glow-soft: rgba(130, 217, 103, 0.22);
+  --shadow-card: 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --highlight-top: rgba(144, 215, 98, 0.05);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(26, 42, 46, 0.55), rgba(15, 25, 28, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(21, 34, 40, 0.4), rgba(15, 25, 28, 0.3));
+  --term-frame: rgba(8, 16, 18, 0.6);
+  --term-background: #0f191c;
+  --statusbar-bg: rgba(15, 25, 28, 0.6);
+}
+
+/* Claude — warm light palette inspired by Claude AI's brand. Light-only (no
+   dark sibling), stays put on OS flip. Background #FAF9F5, foreground #141413,
+   accent terracotta #D97757 — the Claude terminal palette colours. */
+:root[data-app-theme='claude'] {
+  --bg: #faf9f5;
+  --surface: #fffbf8;
+  --surface-2: #f5f0ea;
+  --rail: rgba(250, 249, 245, 0.88);
+  --sidebar: rgba(255, 251, 248, 0.78);
+  --orange: #d97757; /* primary accent — Claude terracotta */
+  --orange-bright: #e88d6e;
+  --orange-deep: #c06445;
+  --ember: #c15f3c; /* hot/danger — darker terracotta */
+  --gold: #b16803;
+  --teal: #2e8b8b;
+  --cream: #141413; /* primary text */
+  --cream-dim: #3d3d3c;
+  --cream-ghost: #8c8a86;
+  --line: rgba(217, 119, 87, 0.25);
+  --line-soft: rgba(20, 20, 19, 0.12);
+  --line-dark: #e8e3dc;
+  --glow: rgba(217, 119, 87, 0.35);
+  --glow-soft: rgba(217, 119, 87, 0.18);
+  --shadow-card: 0 2px 6px -2px rgba(60, 40, 20, 0.2);
+  --highlight-top: rgba(255, 255, 255, 0.6);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(255, 251, 248, 0.85), rgba(250, 249, 245, 0.5));
+  --grad-content: linear-gradient(180deg, rgba(255, 251, 248, 0.5), rgba(250, 249, 245, 0.35));
+  --term-frame: rgba(60, 50, 40, 0.1);
+  --term-background: #faf9f5;
+  --statusbar-bg: rgba(250, 249, 245, 0.75);
+}
+
+/* Claude Dark — dark sibling of the Claude family. Dark scheme, flips with
+   OS alongside the light Claude variant. Background #1A1A1E, foreground
+   #E8E6DC, accent terracotta #D97757 — the Claude brand palette on dark. */
+:root[data-app-theme='claude-dark'] {
+  --bg: #1a1a1e;
+  --surface: #222226;
+  --surface-2: #2a2a2e;
+  --rail: rgba(26, 26, 30, 0.85);
+  --sidebar: rgba(34, 34, 38, 0.72);
+  --orange: #d97757; /* primary accent — Claude terracotta */
+  --orange-bright: #e88d6e;
+  --orange-deep: #c06445;
+  --ember: #c15f3c; /* hot/danger */
+  --gold: #b16803;
+  --teal: #2e8b8b;
+  --cream: #e8e6dc; /* primary text */
+  --cream-dim: #b5b3a9;
+  --cream-ghost: #7a7876;
+  --line: rgba(217, 119, 87, 0.15);
+  --line-soft: rgba(232, 230, 220, 0.08);
+  --line-dark: #0e0e12;
+  --glow: rgba(217, 119, 87, 0.5);
+  --glow-soft: rgba(217, 119, 87, 0.22);
+  --shadow-card: 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --highlight-top: rgba(232, 141, 110, 0.05);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(42, 42, 46, 0.55), rgba(26, 26, 30, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(34, 34, 38, 0.4), rgba(26, 26, 30, 0.3));
+  --term-frame: rgba(12, 12, 16, 0.6);
+  --term-background: #1a1a1e;
+  --statusbar-bg: rgba(26, 26, 30, 0.6);
+}

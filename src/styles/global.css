@@ -1,0 +1,142 @@
+@import 'tailwindcss';
+
+/* ===================================================== tailwind theme ==== */
+/* Maps the runtime vars from tokens.css into Tailwind utility namespaces.
+   `inline` makes utilities reference var(--cream) etc. directly, so the
+   light-scheme swap (data-theme) and applyAppearance() keep working. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-rail: var(--rail);
+  --color-sidebar: var(--sidebar);
+  --color-orange: var(--orange);
+  --color-orange-bright: var(--orange-bright);
+  --color-orange-deep: var(--orange-deep);
+  --color-ember: var(--ember);
+  --color-gold: var(--gold);
+  --color-teal: var(--teal);
+  --color-cream: var(--cream);
+  --color-cream-dim: var(--cream-dim);
+  --color-cream-ghost: var(--cream-ghost);
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-dark: var(--line-dark);
+  --color-glow: var(--glow);
+  --color-glow-soft: var(--glow-soft);
+  --color-term-frame: var(--term-frame);
+  --color-term-bg: var(--term-background);
+  --color-statusbar: var(--statusbar-bg);
+  /* Dark ink on orange fills (rail selection, primary buttons); scheme-invariant. */
+  --color-ink: #1a120c;
+
+  --font-sans: var(--sf);
+  --font-display: var(--display);
+  --font-mono: var(--mono);
+  --font-terminal: var(--terminal-font);
+  --font-stencil: var(--stencil-font);
+
+  /* Semantic text scale: same ratios as tokens.css (body 13px, heading 18px). */
+  --text-body-xs: calc(var(--font-body-size) * 0.7692307692);
+  --text-body-2xs: calc(var(--font-body-size) * 0.8461538462);
+  --text-body-sm: calc(var(--font-body-size) * 0.9230769231);
+  --text-body-sm-plus: calc(var(--font-body-size) * 0.9615384615);
+  --text-body: var(--font-body-size);
+  --text-body-md: calc(var(--font-body-size) * 1.0769230769);
+  --text-body-lg: calc(var(--font-body-size) * 1.1538461538);
+  --text-heading-2xs: calc(var(--font-heading-size) * 0.7222222222);
+  --text-heading-sm: calc(var(--font-heading-size) * 0.8888888889);
+  --text-heading: var(--font-heading-size);
+  --text-heading-md: calc(var(--font-heading-size) * 1.1111111111);
+  --text-heading-lg: calc(var(--font-heading-size) * 1.4444444444);
+  --text-heading-xl: calc(var(--font-heading-size) * 1.5555555556);
+  --text-heading-display: calc(var(--font-heading-size) * 1.6666666667);
+
+  /* Status LED pulse (session cards). */
+  --animate-led-pulse: led-pulse 2.6s infinite;
+  @keyframes led-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
+  }
+}
+
+/* Tauri custom-titlebar drag regions. Mouse dragging is handled by Tauri's
+   injected handler on [data-tauri-drag-region]; `app-region` only adds touch/pen
+   support (Windows) and is a harmless no-op on macOS. (-webkit-app-region is an
+   Electron-ism that does nothing in Tauri's WKWebView — that was the old bug.) */
+*[data-tauri-drag-region] {
+  app-region: drag;
+}
+@utility app-no-drag {
+  app-region: no-drag;
+}
+/* Branded glow text (logo, active/selected display text). */
+@utility glow-orange {
+  color: var(--orange-bright);
+  text-shadow: 0 0 12px var(--glow);
+}
+/* Stencil lettering (chips, paths); family folds into body via tokens. */
+@utility stencil {
+  font-family: var(--stencil-font);
+  letter-spacing: 0.1em;
+}
+
+/* ============================================================ base ====== */
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+#root {
+  display: flex;
+  flex-direction: column;
+}
+body {
+  font-family: var(--sf);
+  font-size: var(--text-body);
+  color: var(--cream);
+  overflow: hidden;
+  background: var(--surface);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 134, 54, 0.25);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 99;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================= xterm host overrides ===== */
+/* xterm fills the .term-host slot; transparent so the chrome layers show. */
+.term-host .xterm,
+.term-host .xterm-viewport,
+.term-host .xterm-screen {
+  height: 100% !important;
+  background-color: transparent !important;
+}
+.term-host .xterm-viewport::-webkit-scrollbar {
+  width: 7px;
+}
+
