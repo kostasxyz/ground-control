@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { useStore } from '@/state/store'
+import { selectedWorktreeKey, visibleTerminals } from '@/state/worktreeScope'
 import { FONT_SIZE_BOUNDS } from '@shared/fonts'
 import { TerminalView } from '@/terminal/TerminalView'
 import { Button } from '@/components/ui/Button'
@@ -14,7 +15,13 @@ export function ConsolePane() {
   const settings = useStore((s) => s.settings)
   const patchSettings = useStore((s) => s.patchSettings)
   const selectSession = useStore((s) => s.selectSession)
-  const archiveSession = useStore((s) => s.archiveSession)
+  const requestArchiveSession = useStore((s) => s.requestArchiveSession)
+  const projects = useStore((s) => s.projects)
+  const activeProjectId = useStore((s) => s.activeProjectId)
+  const shellTerminals = useStore((s) => s.shellTerminals)
+  const newShellTerminal = useStore((s) => s.newShellTerminal)
+  const setTerminalPanelOpen = useStore((s) => s.setTerminalPanelOpen)
+  const terminalPanelOpen = useStore((s) => s.terminalPanelOpen)
 
   const { min: termMin, max: termMax } = FONT_SIZE_BOUNDS.terminal
   const termSize = settings.terminalFontSize
@@ -23,6 +30,25 @@ export function ConsolePane() {
     () => sessions.find((s) => s.id === activeSessionId && !s.archived) ?? null,
     [sessions, activeSessionId]
   )
+
+  // Toggle the project-terminals dock; when opening an empty project/worktree,
+  // spawn a first shell (newShellTerminal already flips terminalPanelOpen on).
+  const projectTerminals = useMemo(() => {
+    const project = projects.find((p) => p.id === activeProjectId)
+    if (!project) return []
+    return visibleTerminals(shellTerminals, project.id, selectedWorktreeKey(project))
+  }, [projects, activeProjectId, shellTerminals])
+
+  const toggleProjectTerminals = () => {
+    if (!activeProjectId) return
+    if (terminalPanelOpen) {
+      setTerminalPanelOpen(false)
+    } else if (projectTerminals.length === 0) {
+      newShellTerminal()
+    } else {
+      setTerminalPanelOpen(true)
+    }
+  }
   const activeIsLive = !!activeSessionId && liveIds.includes(activeSessionId)
   const activeError = activeSessionId ? errors[activeSessionId] : undefined
 
@@ -49,16 +75,21 @@ export function ConsolePane() {
           >
             <Icon name="zoom-out" size={11} />
           </IconButton>
-          {/* Perma-disabled: native title (disabled buttons don't hover-trigger tooltips). */}
-          <IconButton className="h-6 w-6 border-0 bg-transparent hover:bg-transparent" disabled title="Split (coming soon)" aria-label="Split (coming soon)">
-            <Icon name="split" size={11} />
+          <IconButton
+            className="h-6 w-6 border-0 bg-transparent hover:bg-transparent"
+            tooltip={terminalPanelOpen ? 'Hide terminals' : 'Project terminals'}
+            disabled={!activeProjectId}
+            onClick={toggleProjectTerminals}
+          >
+            <Icon name="terminal" size={11} />
           </IconButton>
+          <span className="mx-1 h-[18px] w-px shrink-0 bg-line" aria-hidden />
           <IconButton
             className="h-6 w-6 border-0 bg-transparent hover:bg-transparent"
             tooltip="Archive session"
             style={{ color: 'var(--ember)' }}
             disabled={!active}
-            onClick={() => active && archiveSession(active.id)}
+            onClick={() => active && requestArchiveSession(active.id)}
           >
             <Icon name="archive" size={11} />
           </IconButton>

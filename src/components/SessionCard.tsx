@@ -19,7 +19,7 @@ const STATUS: Record<SessionStatus, { label: string; color: string; pulse: boole
 export function SessionCard({ session }: { session: Session }) {
   const activeSessionId = useStore((s) => s.activeSessionId)
   const selectSession = useStore((s) => s.selectSession)
-  const archiveSession = useStore((s) => s.archiveSession)
+  const requestArchiveSession = useStore((s) => s.requestArchiveSession)
   const renameSession = useStore((s) => s.renameSession)
 
   const [editing, setEditing] = useState(false)
@@ -88,7 +88,7 @@ export function SessionCard({ session }: { session: Session }) {
         tooltip="Archive session"
         onClick={(e) => {
           e.stopPropagation()
-          archiveSession(session.id)
+          requestArchiveSession(session.id)
         }}
       >
         <Icon name="archive" size={14} />

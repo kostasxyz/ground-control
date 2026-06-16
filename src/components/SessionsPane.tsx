@@ -54,20 +54,23 @@ export function SessionsPane() {
     <div className={paneClass}>
       <NewSessionDialog />
 
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-2 pt-2 pb-4 pl-4">
-        <div className="flex items-center justify-end">
-          <Button
-            variant="primary"
-            onClick={openNewSession}
-            disabled={noAgents}
-            title={noAgents ? 'No agent CLIs found' : 'Start a new session'}
-            aria-label="New session"
-            className="px-1.5 py-1"
-          >
-            <Icon name="plus" size={13} />
-          </Button>
-        </div>
+      <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3">
+        <h2 className="min-w-0 truncate font-display text-heading-sm font-bold text-orange">
+          {project.name}
+        </h2>
+        <Button
+          variant="ctrl"
+          onClick={openNewSession}
+          disabled={noAgents}
+          title={noAgents ? 'No agent CLIs found' : 'Start a new session'}
+          aria-label="New session"
+          className="shrink-0 border-line/70 bg-transparent text-cream-dim hover:not-disabled:bg-transparent"
+        >
+          <Icon name="plus" size={13} /> New session
+        </Button>
+      </div>
 
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-2 pt-2 pb-4 pl-4">
         {noAgents && (
           <div className="rounded-lg border-[0.5px] border-ember/40 bg-ember/8 px-[11px] py-2 text-body-sm leading-normal text-ember">
             No agent CLIs were found on your PATH. Install one of{' '}

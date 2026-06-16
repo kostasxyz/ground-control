@@ -101,6 +101,8 @@ interface Store {
   activeSessionId: string | null
   /** Whether the "new session" agent picker is open. */
   newSessionOpen: boolean
+  /** Session id pending archive confirmation, or null. Runtime-only. */
+  sessionToArchive: string | null
   /** Sessions with a mounted terminal + live PTY (LRU order, front = newest). */
   liveIds: string[]
   /** Whether the project-terminals panel is expanded. Runtime-only (boots collapsed, P007). */
@@ -162,6 +164,8 @@ interface Store {
   closeNewSession(): void
   newSession(agent: AgentId): void
   selectSession(id: string): void
+  requestArchiveSession(id: string): void
+  cancelArchiveSession(): void
   archiveSession(id: string): void
   markStarted(id: string): void
   markRunning(id: string): void
@@ -271,6 +275,7 @@ export const useStore = create<Store>((set, get) => ({
   activeSessionByWorktree: {},
   activeSessionId: null,
   newSessionOpen: false,
+  sessionToArchive: null,
   liveIds: [],
   terminalPanelOpen: false,
   shellTerminals: [],
@@ -1063,6 +1068,16 @@ export const useStore = create<Store>((set, get) => ({
     persist(get)
   },
 
+  requestArchiveSession(id) {
+    if (get().sessions.some((se) => se.id === id && !se.archived)) {
+      set({ sessionToArchive: id })
+    }
+  },
+
+  cancelArchiveSession() {
+    set({ sessionToArchive: null })
+  },
+
   archiveSession(id) {
     set((s) => {
       const session = s.sessions.find((se) => se.id === id)
@@ -1078,6 +1093,7 @@ export const useStore = create<Store>((set, get) => ({
         liveIds: s.liveIds.filter((x) => x !== id),
         activeSessionByWorktree,
         activeSessionId: s.activeSessionId === id ? null : s.activeSessionId,
+        sessionToArchive: s.sessionToArchive === id ? null : s.sessionToArchive,
         errors: { ...s.errors, [id]: undefined },
         sessions: s.sessions.map((se) =>
           se.id === id ? { ...se, archived: true, archivedAt: Date.now() } : se

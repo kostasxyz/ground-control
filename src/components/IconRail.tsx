@@ -2,7 +2,7 @@ import { useStore } from '@/state/store'
 import { initials } from '@/lib/constants'
 
 const railIc =
-  'relative flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-[9px] border-[0.5px] border-transparent font-extrabold transition-all duration-150'
+  'relative flex h-[27px] w-[27px] cursor-pointer items-center justify-center rounded-[6px] border-[0.5px] border-transparent font-extrabold transition-all duration-150'
 const railIcIdle =
   'bg-orange/4 text-cream-dim hover:bg-orange/12 hover:text-orange-bright'
 const railIcSelected = 'border-orange bg-orange/15 text-orange-bright'
@@ -22,7 +22,7 @@ export function IconRail({ hidden = false }: { hidden?: boolean }) {
   if (hidden) return null
 
   return (
-    <aside className="flex w-14 shrink-0 flex-col items-center gap-2 border-r border-line bg-rail py-2.5 backdrop-blur-[30px]">
+    <aside className="flex w-[39px] shrink-0 flex-col items-center gap-2 border-r border-line bg-rail py-2.5 backdrop-blur-[30px]">
       {projects
         .filter((p) => !p.archived)
         .map((p) => {

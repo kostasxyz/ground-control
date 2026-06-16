@@ -5,6 +5,7 @@ import { Titlebar } from '@/components/Titlebar'
 import { WelcomePage } from '@/components/WelcomePage'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { StatusBar } from '@/components/StatusBar'
+import { ArchiveSessionConfirm } from '@/components/ArchiveSessionConfirm'
 import { flushTerminalAppearance, setTerminalApplyDeferred } from '@/terminal/registry'
 import { setupZoom } from '@/lib/zoom'
 
@@ -72,6 +73,7 @@ export default function App() {
           {workspaceLoaded && <TerminalDock hidden={view !== 'workspace' ? true : undefined} />}
         </Suspense>
         <StatusBar />
+        <ArchiveSessionConfirm />
       </div>
     </Tooltip.Provider>
   )
