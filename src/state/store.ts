@@ -159,6 +159,7 @@ interface Store {
   clearActiveProject(): void
   archiveProject(id: string): void
   deleteProject(id: string): Promise<void>
+  toggleProjectPin(id: string): void
   selectProject(id: string): void
   openNewSession(): void
   closeNewSession(): void
@@ -978,6 +979,13 @@ export const useStore = create<Store>((set, get) => ({
         view: !hasActive ? 'welcome' : s.activeProjectId === id ? 'welcome' : s.view
       }
     })
+    persist(get)
+  },
+
+  toggleProjectPin(id) {
+    set((s) => ({
+      projects: s.projects.map((p) => (p.id === id ? { ...p, pinned: !p.pinned } : p))
+    }))
     persist(get)
   },
 

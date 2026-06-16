@@ -14,6 +14,7 @@ export function WelcomePage() {
   const selectProject = useStore((s) => s.selectProject)
   const archiveProject = useStore((s) => s.archiveProject)
   const deleteProject = useStore((s) => s.deleteProject)
+  const toggleProjectPin = useStore((s) => s.toggleProjectPin)
   const activeProjects = projects.filter((p) => !p.archived)
 
   if (activeProjects.length === 0) {
@@ -51,18 +52,9 @@ export function WelcomePage() {
         <h1 className="mb-6 font-display text-heading-md font-bold text-cream">
           Select project
         </h1>
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-4">
-          {activeProjects.map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              sessionCount={sessionCounts.get(project.id) ?? 0}
-              selected={false}
-              onOpen={() => selectProject(project.id)}
-              onArchive={() => archiveProject(project.id)}
-              onDelete={() => void deleteProject(project.id)}
-            />
-          ))}
+
+        {/* Add Project — full-width row */}
+        <div className="mb-4">
           <button
             className="relative flex w-full cursor-pointer flex-row items-center justify-center gap-2.5 rounded-[10px] border-[0.5px] border-dashed border-line-soft px-4 py-2.5 text-left transition-all duration-150 hover:border-orange/40 hover:bg-orange/6"
             onClick={() => void addProject()}
@@ -79,6 +71,23 @@ export function WelcomePage() {
               </div>
             </div>
           </button>
+        </div>
+
+        {/* Projects grid */}
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
+          {activeProjects.map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={project}
+              sessionCount={sessionCounts.get(project.id) ?? 0}
+              selected={false}
+              pinned={project.pinned ?? false}
+              onOpen={() => selectProject(project.id)}
+              onArchive={() => archiveProject(project.id)}
+              onDelete={() => void deleteProject(project.id)}
+              onPin={() => toggleProjectPin(project.id)}
+            />
+          ))}
         </div>
       </div>
     </div>

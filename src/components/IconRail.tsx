@@ -24,7 +24,7 @@ export function IconRail({ hidden = false }: { hidden?: boolean }) {
   return (
     <aside className="flex w-[39px] shrink-0 flex-col items-center gap-2 border-r border-line bg-rail py-2.5 backdrop-blur-[30px]">
       {projects
-        .filter((p) => !p.archived)
+        .filter((p) => !p.archived && (p.pinned || p.id === activeProjectId))
         .map((p) => {
           const selected = p.id === activeProjectId
           return (

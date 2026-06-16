@@ -20,6 +20,8 @@ export interface Project {
   activeWorktreePath?: string | null
   archived: boolean
   archivedAt: number | null
+  /** Pinned projects appear in the thin icon rail on the project screen. */
+  pinned?: boolean
 }
 
 export interface Session {
