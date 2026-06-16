@@ -737,12 +737,17 @@ export const useStore = create<Store>((set, get) => ({
               nextFocus
             )
           : s.focusedShellTerminalByWorktree
+      // Trashing the worktree's last terminal leaves the panel empty — collapse it.
+      const emptiedScope =
+        !!trashed &&
+        !shellTerminals.some((t) => t.projectId === trashed.projectId && t.cwd === worktreeKey)
       return {
         shellTerminals,
         shellTerminalSeq,
         focusedShellTerminalByWorktree,
         focusedShellTerminalId: nextFocus,
-        shellExited: { ...s.shellExited, [id]: undefined }
+        shellExited: { ...s.shellExited, [id]: undefined },
+        terminalPanelOpen: emptiedScope ? false : s.terminalPanelOpen
       }
     })
     persist(get)
