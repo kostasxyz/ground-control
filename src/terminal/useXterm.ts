@@ -77,7 +77,11 @@ export function useXterm(opts: XtermOptions): XtermHandles {
       cursorBlink: true,
       fontFamily: resolveTerminalStack(terminalFontFamily),
       fontSize: terminalFontSize,
-      lineHeight: 1.15,
+      // 1.0 — taller line-heights mis-measured cell height and broke OpenCode's
+      // output layout (the original opencode glitch). The default DOM renderer
+      // is kept deliberately: it honors allowTransparency so the chrome image
+      // shows through, which the WebGL renderer does not in this webview.
+      lineHeight: 1.0,
       letterSpacing: 0,
       scrollback: 5000,
       allowTransparency: true,
