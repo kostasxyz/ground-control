@@ -1077,7 +1077,44 @@ export const useStore = create<Store>((set, get) => ({
         se.id === id ? { ...se, lastActiveAt: Date.now() } : se
       )
     }))
-    set((s) => withLive(s, id)) // cold → mount → spawns with --resume
+    // A previously-launched Claude session resumes from its on-disk transcript.
+    // But Claude only writes that transcript after the first prompt, so a session
+    // abandoned at "Waiting for initial prompt…" has none — and `claude --resume`
+    // would loop on "No conversation found". When the transcript is gone there's
+    // nothing to resume, so relaunch the session fresh (new id, `--session-id`)
+    // instead. Already-live or never-started sessions mount directly.
+    if (
+      session.agent === 'claude' &&
+      session.started &&
+      session.agentSessionId &&
+      !get().liveIds.includes(id)
+    ) {
+      const sid = session.agentSessionId
+      void window.gc.transcript.exists(sid).then((exists) => {
+        if (get().activeSessionId !== id || get().liveIds.includes(id)) return
+        set((s) => {
+          const live = withLive(s, id)
+          if (exists) return live // transcript present → resume as-is
+          // Missing → reset to a pre-launch state so the next mount spawns new.
+          return {
+            ...live,
+            sessions: (live.sessions ?? s.sessions).map((se) =>
+              se.id === id
+                ? {
+                    ...se,
+                    agentSessionId: uuid(),
+                    started: false,
+                    status: 'pending' as SessionStatus
+                  }
+                : se
+            )
+          }
+        })
+        persist(get)
+      })
+    } else {
+      set((s) => withLive(s, id)) // cold → mount → spawns
+    }
     persist(get)
   },
 

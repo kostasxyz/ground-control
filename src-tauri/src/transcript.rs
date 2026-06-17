@@ -53,6 +53,15 @@ fn tidy(text: &str, max: usize) -> String {
     }
 }
 
+/// Whether Claude has a resumable transcript on disk for this session id.
+/// The app assigns Claude's session id up front (`--session-id`), but Claude
+/// only writes `<uuid>.jsonl` after the first prompt — so an abandoned session
+/// has none, and `claude --resume` would loop on "No conversation found".
+#[tauri::command]
+pub fn transcript_conversation_exists(agent_session_id: String) -> bool {
+    find_transcript(&agent_session_id).is_some()
+}
+
 #[tauri::command]
 pub fn transcript_derive_title(agent_session_id: String) -> Option<String> {
     let file = find_transcript(&agent_session_id)?;

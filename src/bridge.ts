@@ -139,7 +139,9 @@ const api: GroundControlApi = {
   },
   transcript: {
     deriveTitle: (agentSessionId: string) =>
-      invoke<string | null>('transcript_derive_title', { agentSessionId })
+      invoke<string | null>('transcript_derive_title', { agentSessionId }),
+    exists: (agentSessionId: string) =>
+      invoke<boolean>('transcript_conversation_exists', { agentSessionId })
   },
   git: {
     info: (projectPath: string) => invoke<GitProjectInfo>('git_info', { projectPath }),

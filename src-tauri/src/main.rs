@@ -97,6 +97,7 @@ fn main() {
             terminalbg::terminal_bg_copy_upload,
             terminalbg::terminal_bg_delete,
             transcript::transcript_derive_title,
+            transcript::transcript_conversation_exists,
             git::git_info,
             git::git_status,
             git::git_checkout,

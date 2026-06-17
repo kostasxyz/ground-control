@@ -286,6 +286,8 @@ export interface GroundControlApi {
   transcript: {
     /** Best-effort title from Claude's own jsonl (first user message). */
     deriveTitle(agentSessionId: string): Promise<string | null>
+    /** Whether a resumable Claude transcript exists on disk for this id. */
+    exists(agentSessionId: string): Promise<boolean>
   }
   git: {
     info(projectPath: string): Promise<GitProjectInfo>
