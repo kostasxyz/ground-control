@@ -21,15 +21,12 @@ export function StatusBar() {
     [sessions, activeSessionId]
   )
 
-  // Show the active session's agent + version; fall back to a count when idle.
+  // Show the active session's agent + version; nothing when idle.
   const agentLabel = (() => {
-    if (session) {
-      const meta = AGENTS[session.agent]
-      const info = agents?.[session.agent]
-      return info?.found ? `${meta.label} ${info.version ?? ''}`.trim() : `${meta.bin}: not found`
-    }
-    const found = agents ? Object.values(agents).filter((a) => a.found).length : 0
-    return agents ? `${found} agent${found === 1 ? '' : 's'} ready` : ''
+    if (!session) return ''
+    const meta = AGENTS[session.agent]
+    const info = agents?.[session.agent]
+    return info?.found ? `${meta.label} ${info.version ?? ''}`.trim() : `${meta.bin}: not found`
   })()
 
   const selectedPath = project ? selectedWorktreeKey(project) : null
