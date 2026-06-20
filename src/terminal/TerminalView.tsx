@@ -48,10 +48,22 @@ export function TerminalView({ session, active }: Props) {
     return () => clearInterval(iv)
   }, [title, sessionId, refreshTitle])
 
+  // OpenCode paints its own opaque, edge-to-edge background. Two things would
+  // otherwise leak the chrome image around it: (1) the usual inner padding, and
+  // (2) the sub-cell remainder on the right/bottom that the terminal grid never
+  // covers. So for OpenCode we drop the padding and give the host an opaque
+  // backdrop, so the remainder shows the solid backdrop instead of the image.
+  const isOpencode = session.agent === 'opencode'
+  const hostPadding = isOpencode ? '' : ' px-2.5 py-2'
+
   return (
     <div className="absolute inset-0 z-[2] flex" style={{ display: active ? 'flex' : 'none' }}>
       {/* .term-host scopes the xterm sizing overrides in global.css */}
-      <div className="term-host relative min-w-0 flex-1 overflow-hidden px-2.5 py-2" ref={ref} />
+      <div
+        className={`term-host relative min-w-0 flex-1 overflow-hidden${hostPadding}`}
+        style={isOpencode ? { backgroundColor: 'var(--term-background)' } : undefined}
+        ref={ref}
+      />
     </div>
   )
 }

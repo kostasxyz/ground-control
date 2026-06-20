@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit'
+import { CanvasAddon } from '@xterm/addon-canvas'
 import { resolveTerminalStack } from '@shared/fonts'
 import { useStore } from '@/state/store'
 import { buildXtermTheme } from './xtermTheme'
@@ -78,11 +79,13 @@ export function useXterm(opts: XtermOptions): XtermHandles {
       fontFamily: resolveTerminalStack(terminalFontFamily),
       fontSize: terminalFontSize,
       // 1.0 — taller line-heights mis-measured cell height and broke OpenCode's
-      // output layout (the original opencode glitch). The default DOM renderer
-      // is kept deliberately: it honors allowTransparency so the chrome image
-      // shows through, which the WebGL renderer does not in this webview.
+      // output layout (the original opencode glitch).
       lineHeight: 1.0,
       letterSpacing: 0,
+      // Draw block-element/box-drawing glyphs (TUI logos, borders) programmatically
+      // so they tile cell-to-cell instead of leaving HiDPI row seams. Only takes
+      // effect with the canvas renderer below — the DOM renderer ignores it.
+      customGlyphs: true,
       scrollback: 5000,
       allowTransparency: true,
       theme: buildXtermTheme(terminalThemeId)
@@ -90,6 +93,15 @@ export function useXterm(opts: XtermOptions): XtermHandles {
     const fit = new FitAddon()
     term.loadAddon(fit)
     term.open(container)
+    // Canvas renderer: tiles block/box glyphs cleanly (kills the HiDPI row seams
+    // the DOM renderer leaves in TUI logos/borders) and, unlike WebGL, honors
+    // allowTransparency so the chrome image still shows through. If it can't
+    // initialize, xterm stays on the DOM renderer.
+    try {
+      term.loadAddon(new CanvasAddon())
+    } catch {
+      /* DOM renderer fallback */
+    }
     termRef.current = term
     fitRef.current = fit
     registerTerminal(id, { term, fit, container })
