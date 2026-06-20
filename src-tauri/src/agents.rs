@@ -9,12 +9,13 @@ use crate::model::AgentInfo;
 // resumable session id is acquired (assign / precreate / discover) and how the
 // CLI is invoked fresh vs resume.
 
-pub const AGENT_IDS: [&str; 4] = ["claude", "codex", "opencode", "cursor"];
+pub const AGENT_IDS: [&str; 5] = ["claude", "pi", "codex", "opencode", "cursor"];
 
 /// The binary name to look up for an agent id.
 pub fn agent_bin(id: &str) -> Option<&'static str> {
     match id {
         "claude" => Some("claude"),
+        "pi" => Some("pi"),
         "codex" => Some("codex"),
         "opencode" => Some("opencode"),
         "cursor" => Some("cursor-agent"),
@@ -114,6 +115,14 @@ pub fn plan_spawn(
             } else {
                 vec!["--session-id".into(), sid.into()]
             },
+            emit_id: None,
+            watch: IdWatch::None,
+        },
+        // pi's `--session-id` creates the id if missing and reuses it when
+        // present, so new and resume take the same flag (no `--resume` split
+        // like claude). We own the id at birth (assign).
+        "pi" => SpawnPlan {
+            argv: vec!["--session-id".into(), sid.into()],
             emit_id: None,
             watch: IdWatch::None,
         },
