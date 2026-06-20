@@ -3,7 +3,7 @@
 // acquired; the *behavioral* adapters live in electron/main/agents.ts. This file
 // owns only what both sides need: the id/label/bin and the id strategy.
 
-export type AgentId = 'claude' | 'codex' | 'opencode' | 'cursor'
+export type AgentId = 'claude' | 'pi' | 'codex' | 'opencode' | 'cursor'
 
 // How a session's resumable id comes to exist:
 //  - assign   : we mint it and pass it on first launch        (claude --session-id)
@@ -21,13 +21,14 @@ export interface AgentMeta {
 
 export const AGENTS: Record<AgentId, AgentMeta> = {
   claude: { id: 'claude', label: 'Claude', bin: 'claude', idStrategy: 'assign' },
+  pi: { id: 'pi', label: 'Pi', bin: 'pi', idStrategy: 'assign' },
   codex: { id: 'codex', label: 'Codex', bin: 'codex', idStrategy: 'discover' },
   opencode: { id: 'opencode', label: 'OpenCode', bin: 'opencode', idStrategy: 'discover' },
   cursor: { id: 'cursor', label: 'Cursor', bin: 'cursor-agent', idStrategy: 'precreate' }
 }
 
-/** Dialog order — Claude (the default) first, then the rest. */
-export const AGENT_ORDER: AgentId[] = ['claude', 'codex', 'opencode', 'cursor']
+/** Dialog order — Claude (the default) first, then Pi, then the rest. */
+export const AGENT_ORDER: AgentId[] = ['claude', 'pi', 'codex', 'opencode', 'cursor']
 
 export function isAgentId(x: unknown): x is AgentId {
   return typeof x === 'string' && x in AGENTS

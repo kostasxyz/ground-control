@@ -12,6 +12,7 @@ import type {
   ShellTerminal
 } from '@shared/types'
 import { normalizeSettings } from '@shared/settings'
+import { AGENTS } from '@shared/agents'
 import { uuid } from '@/lib/id'
 import { appearanceChanged, applyAppearance } from '@/lib/applyAppearance'
 import {
@@ -1032,9 +1033,10 @@ export const useStore = create<Store>((set, get) => ({
       id: uuid(),
       projectId: activeProjectId,
       agent,
-      // claude: we own the id now. cursor: backfilled post create-chat. codex/
-      // opencode: backfilled once they persist a record on the first message.
-      agentSessionId: agent === 'claude' ? uuid() : null,
+      // assign (claude, pi): we own the id now. cursor: backfilled post
+      // create-chat. codex/opencode: backfilled once they persist a record on
+      // the first message.
+      agentSessionId: AGENTS[agent].idStrategy === 'assign' ? uuid() : null,
       // claude keeps the placeholder so its transcript title fills in; others get
       // a stable fallback (non-placeholder ⇒ never auto-derived).
       title: agent === 'claude' ? PLACEHOLDER_TITLE : agentFallbackTitle(agent, project.name),
