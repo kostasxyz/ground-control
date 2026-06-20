@@ -7,6 +7,12 @@ import { useStore } from '@/state/store'
 import { buildXtermTheme } from './xtermTheme'
 import { registerTerminal, unregisterTerminal } from './registry'
 
+// OS-modifier + Enter inserts a newline instead of submitting. ESC+CR is the
+// "Alt/Option+Enter" sequence most agent CLIs (Claude, Codex, …) treat as
+// "insert newline" (PLAN §5.4); harmless in a plain shell. The default unless a
+// terminal overrides it via `newlineSeq` (pi keys off Shift+Enter — useTerminal).
+const DEFAULT_NEWLINE = '\x1b\r'
+
 /** How a terminal's bytes get to and from its PTY (gc.session.* or gc.terminal.*). */
 export interface XtermIo {
   write(id: string, data: string): void
@@ -35,6 +41,9 @@ export interface XtermOptions {
   spawn: (cols: number, rows: number) => void
   /** Hook xterm setup before the PTY exists (key handlers etc.). */
   setup?: (term: Terminal) => void
+  /** Bytes written on OS-modifier+Enter to insert a newline. Defaults to
+   *  ESC+CR; agents that read a different sequence (pi) override it. */
+  newlineSeq?: string
 }
 
 export interface XtermHandles {
@@ -111,6 +120,22 @@ export function useXterm(opts: XtermOptions): XtermHandles {
     registerTerminal(id, { term, fit, container })
 
     cbRef.current.setup?.(term)
+
+    // OS-modifier (⌘ on macOS, Ctrl elsewhere) + Enter → newline, for every
+    // terminal — agent and shell alike. Must run before xterm's default Enter.
+    const isMac = window.gc.system.platform === 'darwin'
+    term.attachCustomKeyEventHandler((e) => {
+      if (
+        e.type === 'keydown' &&
+        e.key === 'Enter' &&
+        (isMac ? e.metaKey : e.ctrlKey) &&
+        !e.altKey
+      ) {
+        io.write(id, cbRef.current.newlineSeq ?? DEFAULT_NEWLINE)
+        return false
+      }
+      return true
+    })
 
     const offData = io.onData((e) => {
       if (!alive || e.id !== id) return
