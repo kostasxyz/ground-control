@@ -1,14 +1,19 @@
 import { useEffect, useRef } from 'react'
-import type { Terminal } from '@xterm/xterm'
 import type { AgentId, SpawnMode } from '@shared/types'
 import { useXterm, type XtermIo } from './useXterm'
 
 // Alt-screen enable — Claude's TUI emits this when it takes over the screen.
 // We use it to reveal the terminal and hide shell-startup noise (PLAN §5.3).
 const ALT_SCREEN = '\x1b[?1049h'
-// Shift+Enter → legacy Alt+Enter, which Claude treats as "insert newline" (PLAN §5.4).
-const SHIFT_ENTER = '\x1b\r'
 const REVEAL_FALLBACK_MS = 2500
+
+// Per-agent override for the OS-modifier+Enter newline byte sequence (default is
+// ESC+CR, in useXterm). pi's only newline binding is Shift+Enter, which it reads
+// as the kitty-protocol CSI sequence `\x1b[13;2u` (enter=13, shift=2) — parsed
+// regardless of whether the terminal negotiated the kitty keyboard protocol.
+const AGENT_NEWLINE: Partial<Record<AgentId, string>> = {
+  pi: '\x1b[13;2u'
+}
 
 const sessionIo: XtermIo = {
   write: (id, data) => window.gc.session.write(id, data),
@@ -33,8 +38,8 @@ export interface TerminalOptions {
 
 /**
  * An agent session terminal: the shared xterm core (`useXterm`) plus the
- * agent-only layer — spawn over `gc.session`, ALT_SCREEN reveal, Shift+Enter
- * newline, and the reveal fallback timer.
+ * agent-only layer — spawn over `gc.session`, ALT_SCREEN reveal, and the reveal
+ * fallback timer. (OS-modifier+Enter newline lives in the shared core.)
  */
 export function useTerminal(opts: TerminalOptions) {
   // Latest callbacks/flags without retriggering anything mount-once.
@@ -51,26 +56,12 @@ export function useTerminal(opts: TerminalOptions) {
     id: opts.id,
     io: sessionIo,
     active: opts.active,
+    newlineSeq: AGENT_NEWLINE[opts.agent],
 
-    setup: (term: Terminal) => {
+    setup: () => {
       aliveRef.current = true
       revealedRef.current = false
       tailRef.current = ''
-      // Shift+Enter → newline (must run before xterm's default handling).
-      term.attachCustomKeyEventHandler((e) => {
-        if (
-          e.type === 'keydown' &&
-          e.key === 'Enter' &&
-          e.shiftKey &&
-          !e.ctrlKey &&
-          !e.metaKey &&
-          !e.altKey
-        ) {
-          window.gc.session.write(cbRef.current.id, SHIFT_ENTER)
-          return false
-        }
-        return true
-      })
     },
 
     onData: (data) => {
