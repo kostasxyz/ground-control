@@ -171,6 +171,7 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
             <div
               key={`${scope.projectId}:${scope.cwd}`}
               className="flex min-h-0 min-w-0 flex-1 overflow-x-auto overflow-y-hidden"
+              data-term-scrollbar
               // Hidden, never unmounted, when another worktree is active — running
               // dev servers survive worktree switches (ADR-005).
               style={{ display: isVisible ? undefined : 'none' }}

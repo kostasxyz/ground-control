@@ -109,18 +109,20 @@ export function TerminalColumn({ terminal, cwd, focused }: Props) {
               }}
             />
           ) : (
-            <span className="truncate">{terminal.title}</span>
+            <>
+              <span className="truncate">{terminal.title}</span>
+              <IconButton
+                data-term-rename
+                className={`${colBtn} shrink-0`}
+                tooltip="Rename terminal"
+                onClick={startEditing}
+              >
+                <Icon name="pencil" size={11} />
+              </IconButton>
+            </>
           )}
         </div>
         <div className="flex shrink-0 items-center gap-1" data-term-controls>
-          <IconButton
-            className={colBtn}
-            tooltip="Zoom out"
-            disabled={effectiveSize <= sizeMin}
-            onClick={() => setShellTerminalFontSize(terminal.id, effectiveSize - 1)}
-          >
-            <Icon name="zoom-out" size={11} />
-          </IconButton>
           <IconButton
             className={colBtn}
             tooltip="Zoom in"
@@ -129,11 +131,17 @@ export function TerminalColumn({ terminal, cwd, focused }: Props) {
           >
             <Icon name="zoom-in" size={11} />
           </IconButton>
-          <IconButton className={colBtn} tooltip="Rename terminal" onClick={startEditing}>
-            <Icon name="pencil" size={11} />
-          </IconButton>
           <IconButton
             className={colBtn}
+            tooltip="Zoom out"
+            disabled={effectiveSize <= sizeMin}
+            onClick={() => setShellTerminalFontSize(terminal.id, effectiveSize - 1)}
+          >
+            <Icon name="zoom-out" size={11} />
+          </IconButton>
+          <span className="mx-2 h-4 w-px shrink-0 bg-line" aria-hidden />
+          <IconButton
+            className={`${colBtn} text-ember hover:text-ember`}
             tooltip="Trash terminal"
             onClick={() => trashShellTerminal(terminal.id)}
           >
