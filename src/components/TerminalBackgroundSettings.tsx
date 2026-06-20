@@ -81,7 +81,7 @@ export function TerminalBackgroundSettings({ settings, patchSettings }: Props) {
         >
           <div
             className="relative z-[1] flex flex-col gap-1 text-[calc(var(--text-body-sm)*0.95)] leading-[1.45]"
-            style={{ fontFamily: terminalStack, color: palette.foreground }}
+            style={{ fontFamily: terminalStack, fontWeight: 500, color: palette.foreground }}
           >
             <div className={previewLine}>
               <span style={{ color: palette.cyan }}>~/ground-control</span>

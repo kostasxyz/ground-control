@@ -78,6 +78,8 @@ export function useXterm(opts: XtermOptions): XtermHandles {
       cursorBlink: true,
       fontFamily: resolveTerminalStack(terminalFontFamily),
       fontSize: terminalFontSize,
+      fontWeight: 500,
+      fontWeightBold: 700,
       // 1.0 — taller line-heights mis-measured cell height and broke OpenCode's
       // output layout (the original opencode glitch).
       lineHeight: 1.0,
@@ -97,10 +99,12 @@ export function useXterm(opts: XtermOptions): XtermHandles {
     // the DOM renderer leaves in TUI logos/borders) and, unlike WebGL, honors
     // allowTransparency so the chrome image still shows through. If it can't
     // initialize, xterm stays on the DOM renderer.
+    let canvasAddon: CanvasAddon | null = null
     try {
-      term.loadAddon(new CanvasAddon())
+      canvasAddon = new CanvasAddon()
+      term.loadAddon(canvasAddon)
     } catch {
-      /* DOM renderer fallback */
+      canvasAddon = null /* DOM renderer fallback */
     }
     termRef.current = term
     fitRef.current = fit
@@ -193,7 +197,22 @@ export function useXterm(opts: XtermOptions): XtermHandles {
       offExit()
       unregisterTerminal(id)
       io.kill(id)
-      term.dispose()
+      // Dispose the CanvasAddon BEFORE the terminal: Terminal.dispose() otherwise
+      // tears it down last, and on this xterm/addon-canvas combo that path tries
+      // to re-create a DOM renderer on a half-disposed core and throws
+      // ("onShowLinkUnderline" of undefined). An uncaught throw here unmounts the
+      // whole React root — that's the "Kill All → blank screen" hang. Guarded so
+      // teardown can never propagate (it's already a throwaway terminal).
+      try {
+        canvasAddon?.dispose()
+      } catch {
+        /* renderer already torn down */
+      }
+      try {
+        term.dispose()
+      } catch {
+        /* defensive: never let teardown blank the app */
+      }
       termRef.current = null
       fitRef.current = null
       spawnWhenReadyRef.current = () => {}

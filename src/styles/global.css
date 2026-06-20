@@ -108,7 +108,9 @@ body {
   color: var(--cream);
   overflow: hidden;
   background: var(--surface);
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   user-select: none;
 }
 
@@ -144,4 +146,3 @@ body {
 .term-host .xterm-viewport::-webkit-scrollbar {
   width: 7px;
 }
-

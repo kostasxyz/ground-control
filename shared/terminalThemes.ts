@@ -92,7 +92,7 @@ const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
     magenta: '#bb9af7',
     cyan: '#5fd6c2',
     white: '#f3e3d0',
-    brightBlack: '#8a725d',
+    brightBlack: '#aa8f76',
     brightRed: '#ff7d61',
     brightGreen: '#b9f27c',
     brightYellow: '#ffcf6b',

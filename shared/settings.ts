@@ -45,7 +45,7 @@ export const DEFAULT_SETTINGS: Settings = {
   uiHeadingFontSize: 18,
   uiBodyFontFamily: 'system-ui',
   uiBodyFontSize: 13,
-  terminalFontFamily: 'space-mono',
+  terminalFontFamily: 'jetbrains-mono',
   terminalFontSize: 13,
   terminalBackgroundColor: null,
   terminalBackgroundImage: null,
@@ -68,7 +68,7 @@ function pickBodyId(id: string | undefined): BodyFontId {
 }
 
 function pickTerminalId(id: string | undefined): TerminalFontId {
-  return id && id in TERMINAL_FONTS ? (id as TerminalFontId) : 'space-mono'
+  return id && id in TERMINAL_FONTS ? (id as TerminalFontId) : 'jetbrains-mono'
 }
 
 /**

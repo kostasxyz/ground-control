@@ -94,26 +94,32 @@ const FONT_LOADERS = {
   ],
   'jetbrains-mono': [
     () => import('@fontsource/jetbrains-mono/400.css'),
+    () => import('@fontsource/jetbrains-mono/500.css'),
     () => import('@fontsource/jetbrains-mono/700.css')
   ],
   'fira-code': [
     () => import('@fontsource/fira-code/400.css'),
+    () => import('@fontsource/fira-code/500.css'),
     () => import('@fontsource/fira-code/700.css')
   ],
   'ibm-plex-mono': [
     () => import('@fontsource/ibm-plex-mono/400.css'),
+    () => import('@fontsource/ibm-plex-mono/500.css'),
     () => import('@fontsource/ibm-plex-mono/700.css')
   ],
   'source-code-pro': [
     () => import('@fontsource/source-code-pro/400.css'),
+    () => import('@fontsource/source-code-pro/500.css'),
     () => import('@fontsource/source-code-pro/700.css')
   ],
   'roboto-mono': [
     () => import('@fontsource/roboto-mono/400.css'),
+    () => import('@fontsource/roboto-mono/500.css'),
     () => import('@fontsource/roboto-mono/700.css')
   ],
   inconsolata: [
     () => import('@fontsource/inconsolata/400.css'),
+    () => import('@fontsource/inconsolata/500.css'),
     () => import('@fontsource/inconsolata/700.css')
   ],
   'ubuntu-mono': [

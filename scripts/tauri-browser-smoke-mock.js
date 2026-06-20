@@ -27,7 +27,7 @@
       uiHeadingFontSize: 18,
       uiBodyFontFamily: 'system-ui',
       uiBodyFontSize: 13,
-      terminalFontFamily: 'space-mono',
+      terminalFontFamily: 'jetbrains-mono',
       terminalFontSize: 13,
       terminalBackgroundColor: null,
       terminalBackgroundImage: null,

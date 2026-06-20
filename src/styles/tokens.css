@@ -46,7 +46,7 @@
   --font-body-size: 13px;
   /* Real monospace stack (the terminal's font); applyAppearance() overrides at
      runtime to match settings.terminalFontFamily. Unlike --mono, not a body fold. */
-  --terminal-font: 'Space Mono', ui-monospace, Menlo, monospace;
+  --terminal-font: 'JetBrains Mono', ui-monospace, Menlo, monospace;
   /* Terminal font size; applyAppearance() overrides at runtime to match
      settings.terminalFontSize. Shared by the diff viewer so its code tracks the
      terminal's size, the way --terminal-font tracks its family. */
