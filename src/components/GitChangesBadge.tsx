@@ -61,11 +61,24 @@ export function GitChangesBadge() {
         size={14}
         className={open ? 'text-orange-bright' : dirty ? 'text-orange' : 'opacity-60'}
       />
-      {dirty && status && (
+      {status && (
+        // Always render the counts (zeros included) so the badge keeps a stable
+        // shape and the clean state reads "0  +0  -0" rather than collapsing to
+        // the bare icon. Zero values stay muted; only real changes light up.
         <span className="flex items-center gap-2 tabular-nums">
-          <span className="text-cream-dim">{changed}</span>
-          <span style={{ color: 'var(--teal)' }}>+{status.insertions}</span>
-          <span style={{ color: 'var(--ember)' }}>-{status.deletions}</span>
+          <span className={dirty ? 'text-cream-dim' : 'text-cream-ghost'}>{changed}</span>
+          <span
+            className={status.insertions > 0 ? undefined : 'text-cream-ghost'}
+            style={status.insertions > 0 ? { color: 'var(--teal)' } : undefined}
+          >
+            +{status.insertions}
+          </span>
+          <span
+            className={status.deletions > 0 ? undefined : 'text-cream-ghost'}
+            style={status.deletions > 0 ? { color: 'var(--ember)' } : undefined}
+          >
+            -{status.deletions}
+          </span>
         </span>
       )}
     </button>

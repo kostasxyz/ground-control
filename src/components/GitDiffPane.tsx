@@ -1,9 +1,41 @@
 import { useEffect, useMemo, useState } from 'react'
 import { cn } from '@/lib/cn'
-import type { DiffSource, GitDiffFile, GitFileDiff } from '@shared/types'
+import type { DiffSource, GitDiffFile, GitFileDiff, GitFileStatus } from '@shared/types'
 import { Icon } from './Icon'
 import { initHighlighter, isReady, tokenizeLine, langForFile } from '@/lib/highlighter'
 import { useStore } from '@/state/store'
+
+/** Single-letter status glyphs for the header chip. */
+const STATUS_LETTERS: Record<GitFileStatus, string> = {
+  added: 'A',
+  modified: 'M',
+  deleted: 'D',
+  renamed: 'R',
+  copied: 'C',
+  untracked: 'U'
+}
+
+function statusColor(status: GitFileStatus): string {
+  switch (status) {
+    case 'added':
+    case 'untracked':
+      return 'text-teal'
+    case 'deleted':
+      return 'text-ember'
+    case 'renamed':
+    case 'copied':
+      return 'text-gold'
+    default:
+      return 'text-cream-dim'
+  }
+}
+
+/** Split a repo-relative path into its trailing filename and leading directory.
+ * Root-level files (no slash) report '/' so the header shows e.g. "/notes.md". */
+function splitPath(path: string): { dir: string; name: string } {
+  const i = path.lastIndexOf('/')
+  return i === -1 ? { dir: '/', name: path } : { dir: path.slice(0, i + 1), name: path.slice(i + 1) }
+}
 
 interface GitDiffPaneProps {
   /** Worktree directory the diff is scoped to. */
@@ -164,72 +196,97 @@ export function GitDiffPane({ worktreePath, source, file }: GitDiffPaneProps) {
     )
   }
 
+  const { dir, name } = splitPath(file.path)
+
   return (
-    <div className="flex min-w-0 flex-1 flex-col overflow-auto">
-      <div className="sticky top-0 z-10 flex h-11 shrink-0 items-center border-b border-line-soft bg-surface/80 px-3 backdrop-blur-sm">
-        <span className="truncate font-display text-heading-2xs font-bold text-cream">
-          {file.path}
+    <div className="flex min-w-0 flex-1 flex-col overflow-auto bg-term-bg/70">
+      <div className="sticky top-0 z-10 flex h-11 shrink-0 items-center gap-2.5 border-b border-line-soft bg-surface/80 px-4 backdrop-blur-sm">
+        <span
+          className={cn('shrink-0 font-terminal text-body-sm font-bold', statusColor(file.status))}
+          title={file.status}
+        >
+          {STATUS_LETTERS[file.status]}
+        </span>
+        <span className="min-w-0 truncate font-display text-heading-2xs font-bold">
+          {dir && <span className="font-medium text-cream-ghost">{dir}</span>}
+          <span className="text-cream">{name}</span>
+        </span>
+        <span className="ml-auto flex shrink-0 items-center gap-2 font-terminal text-body-2xs tabular-nums">
+          {file.insertions > 0 && <span className="text-teal">+{file.insertions}</span>}
+          {file.deletions > 0 && <span className="text-ember">−{file.deletions}</span>}
         </span>
       </div>
 
-      <div className="flex-1 p-4 font-terminal text-terminal">
+      <div className="min-w-0 flex-1 font-terminal text-[length:var(--git-diff-font-size,var(--terminal-font-size))] leading-[1.5]">
         {diff.hunks.map((hunk, hunkIndex) => (
-          <div key={hunkIndex} className="mb-5 overflow-hidden rounded-md border border-line-soft bg-term-bg">
-            <div className="border-b border-line-soft bg-cream-ghost/10 px-3 py-1.5 text-terminal text-cream-ghost">
+          <div key={hunkIndex}>
+            <div className="select-text border-y border-line-soft bg-orange/[0.06] px-3 py-1 text-body-2xs text-cream-ghost">
               @@ -{hunk.oldStart},{hunk.oldCount} +{hunk.newStart},{hunk.newCount} @@
               {hunk.header ? ` ${hunk.header}` : ''}
             </div>
-            <div className="divide-y divide-line-soft/50">
-              {hunk.lines.map((line, lineIndex) => {
-                const added = line.kind === 'add'
-                const deleted = line.kind === 'delete'
-                return (
-                  <div
-                    key={lineIndex}
+            {hunk.lines.map((line, lineIndex) => {
+              const added = line.kind === 'add'
+              const deleted = line.kind === 'delete'
+              const gutterTone = added
+                ? 'text-teal/70'
+                : deleted
+                  ? 'text-ember/70'
+                  : 'text-cream-ghost/60'
+              return (
+                <div
+                  key={lineIndex}
+                  className={cn(
+                    // em-based gutter so the line-number columns scale with the
+                    // diff font size and keep room for the digits at any zoom.
+                    'grid grid-cols-[3.5em_3.5em_1fr] items-start',
+                    added && 'bg-teal/[0.09]',
+                    deleted && 'bg-ember/[0.09]'
+                  )}
+                >
+                  <span
                     className={cn(
-                      'grid grid-cols-[44px_44px_1fr] gap-2 px-2 py-0.5 text-terminal leading-normal',
-                      added && 'bg-teal/8',
-                      deleted && 'bg-ember/8'
+                      'select-none bg-line-dark/40 px-1.5 py-px text-right tabular-nums',
+                      gutterTone
                     )}
                   >
-                    <span className="text-right tabular-nums text-cream-ghost">
-                      {line.oldLine ?? ''}
-                    </span>
-                    <span className="text-right tabular-nums text-cream-ghost">
-                      {line.newLine ?? ''}
-                    </span>
+                    {line.oldLine ?? ''}
+                  </span>
+                  <span
+                    className={cn(
+                      'select-none border-r border-line-soft bg-line-dark/40 px-1.5 py-px text-right tabular-nums',
+                      gutterTone
+                    )}
+                  >
+                    {line.newLine ?? ''}
+                  </span>
+                  <span className="min-w-0 whitespace-pre-wrap break-words py-px pr-4 pl-3 text-cream-dim">
                     <span
                       className={cn(
-                        'min-w-0 whitespace-pre-wrap break-all',
-                        added && 'text-teal',
-                        deleted && 'text-ember',
-                        !added && !deleted && 'text-cream-dim'
+                        'inline-block w-3 select-none',
+                        added ? 'text-teal' : deleted ? 'text-ember' : 'text-transparent'
                       )}
                     >
-                      {line.kind === 'add' ? '+' : line.kind === 'delete' ? '−' : ' '}
-                      {highlighted
-                        ? (() => {
-                            const tokens = highlighted[hunkIndex]?.[lineIndex]
-                            return tokens
-                              ? tokens.map((t, i) => (
-                                  <span
-                                    key={i}
-                                    style={t.color ? { color: t.color } : undefined}
-                                  >
-                                    {t.content}
-                                  </span>
-                                ))
-                              : line.text
-                          })()
-                        : line.text}
-                      {line.noTrailingNewline && (
-                        <span className="ml-1 text-cream-ghost">\ No newline at end of file</span>
-                      )}
+                      {added ? '+' : deleted ? '−' : ' '}
                     </span>
-                  </div>
-                )
-              })}
-            </div>
+                    {highlighted
+                      ? (() => {
+                          const tokens = highlighted[hunkIndex]?.[lineIndex]
+                          return tokens
+                            ? tokens.map((t, i) => (
+                                <span key={i} style={t.color ? { color: t.color } : undefined}>
+                                  {t.content}
+                                </span>
+                              ))
+                            : line.text
+                        })()
+                      : line.text}
+                    {line.noTrailingNewline && (
+                      <span className="ml-1 text-cream-ghost">\ No newline at end of file</span>
+                    )}
+                  </span>
+                </div>
+              )
+            })}
           </div>
         ))}
       </div>

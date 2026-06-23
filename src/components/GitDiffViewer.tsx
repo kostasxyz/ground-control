@@ -5,10 +5,12 @@ import { selectedWorktreeKey } from '@/state/worktreeScope'
 import type { DiffSource, GitDiffFile } from '@shared/types'
 import {
   clampGitDiffFileListWidth,
+  clampGitDiffFontSize,
   GIT_DIFF_FILE_LIST_DEFAULT
 } from '@/lib/constants'
 import { useResizeHandle, ResizeHandle } from '@/components/ui/ResizeHandle'
 import { GitDiffFileList } from './GitDiffFileList'
+import { GitDiffFontControl } from './GitDiffFontControl'
 import { GitDiffPane } from './GitDiffPane'
 import { GitDiffSourceSelect } from './GitDiffSourceSelect'
 
@@ -18,6 +20,17 @@ import { GitDiffSourceSelect } from './GitDiffSourceSelect'
  * default and the reset target without retriggering source-keyed effects.
  */
 const WORKING_SOURCE: DiffSource = { kind: 'working' }
+
+/**
+ * ------------------------------------------------
+ * Session-lived memory of the last file the user viewed in each worktree, keyed
+ * by worktree path. Lives outside the component so it survives the viewer
+ * unmounting when the diff is toggled off — reopening the same worktree restores
+ * the prior selection instead of resetting to the first file. Keyed per worktree
+ * so a same-named file in another worktree is never auto-applied. Not persisted
+ * to disk: a fresh app launch starts clean.
+ */
+const lastSelectedByWorktree = new Map<string, string>()
 
 /**
  * ------------------------------------------------
@@ -87,16 +100,26 @@ export function GitDiffViewer() {
   useEffect(() => {
     setSource(WORKING_SOURCE)
     setSourceWorktreeKey(worktreeKey)
-    // Don't carry a file selection across worktrees — a same-named file in the
-    // new worktree would otherwise be auto-selected and diffed without the user
-    // ever picking it.
-    setSelectedPath(null)
+    // Restore this worktree's own last-viewed file (or none if first visit).
+    // loadFiles re-validates it against the freshly loaded list and falls back
+    // to the first file, so a stale path never sticks.
+    setSelectedPath(lastSelectedByWorktree.get(worktreeKey) ?? null)
   }, [worktreeKey])
 
   const changeSource = useCallback(
     (next: DiffSource) => {
       setSource(next)
       setSourceWorktreeKey(worktreeKey)
+    },
+    [worktreeKey]
+  )
+
+  // Select a file and remember it for this worktree, so toggling the diff off
+  // and back on reopens on the same file (per-worktree, session-lived).
+  const selectFile = useCallback(
+    (path: string) => {
+      setSelectedPath(path)
+      if (worktreeKey) lastSelectedByWorktree.set(worktreeKey, path)
     },
     [worktreeKey]
   )
@@ -134,10 +157,18 @@ export function GitDiffViewer() {
         setFiles(result.files)
         setFilesWorktreeKey(worktreeKey)
         setFilesSourceKey(reqSourceKey)
-        // Restore the previous selection if its file still exists in the result.
-        setSelectedPath((prev) =>
-          prev && result.files.some((f) => f.path === prev) ? prev : null
-        )
+        // Resolve the selection against the freshly loaded list: keep the
+        // current file if it survived, else this worktree's remembered file,
+        // else open on the first file. Record the result so a reopen restores it.
+        setSelectedPath((prev) => {
+          const has = (p: string | null | undefined): p is string =>
+            !!p && result.files.some((f) => f.path === p)
+          const remembered = lastSelectedByWorktree.get(worktreeKey)
+          const next = has(prev) ? prev : has(remembered) ? remembered : result.files[0]?.path ?? null
+          if (next) lastSelectedByWorktree.set(worktreeKey, next)
+          else lastSelectedByWorktree.delete(worktreeKey)
+          return next
+        })
       }
     } finally {
       if (reqId === loadReqRef.current) setLoading(false)
@@ -186,6 +217,23 @@ export function GitDiffViewer() {
     onMove: (delta) => setWidth(width + delta)
   })
 
+  // Diff code font size: a dedicated setting that defaults to the terminal font
+  // size (the diff shares the terminal's mono surface). The A−/A+ buttons step
+  // it independently so zooming the diff never disturbs the terminals.
+  const terminalFontSize = useStore((s) => s.settings.terminalFontSize)
+  const fontSize = clampGitDiffFontSize(
+    useStore((s) => s.settings.gitDiffFontSize) ?? terminalFontSize
+  )
+
+  const zoomFont = useCallback(
+    (delta: number) => patchSettings({ gitDiffFontSize: clampGitDiffFontSize(fontSize + delta) }),
+    [patchSettings, fontSize]
+  )
+  const resetFont = useCallback(
+    () => patchSettings({ gitDiffFontSize: terminalFontSize }),
+    [patchSettings, terminalFontSize]
+  )
+
   // Expose files/selection/error only when the loaded list matches BOTH the
   // active worktree and the active source — otherwise a source switch would
   // flash the previous source's files and feed the diff pane a stale file.
@@ -207,16 +255,22 @@ export function GitDiffViewer() {
     <div
       ref={contentRef}
       className="flex min-w-0 flex-1 bg-(image:--grad-content)"
-      style={{ '--git-diff-list-w': `${width}px` } as CSSProperties}
+      style={
+        {
+          '--git-diff-list-w': `${width}px`,
+          '--git-diff-font-size': `${fontSize}px`
+        } as CSSProperties
+      }
     >
       <GitDiffFileList
         files={visibleFiles}
         loading={visibleLoading}
         error={visibleError}
         selectedFile={visibleSelectedPath}
-        onSelect={setSelectedPath}
+        onSelect={selectFile}
         onRefresh={loadFiles}
         onClose={() => setView('workspace')}
+        fontControl={<GitDiffFontControl size={fontSize} onZoom={zoomFont} onReset={resetFont} />}
         sourceSelect={
           <GitDiffSourceSelect
             key={worktreeKey}

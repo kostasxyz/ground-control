@@ -101,6 +101,8 @@ export interface Settings {
   terminalPanelHeightPct: number
   /** Width (px) of the file list pane in the Git diff viewer. */
   gitDiffFileListWidth?: number
+  /** Code font size (px) in the Git diff viewer; undefined → follow terminalFontSize. */
+  gitDiffFontSize?: number
 }
 
 export interface PersistedState {

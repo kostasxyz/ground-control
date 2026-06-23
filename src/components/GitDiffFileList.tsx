@@ -15,6 +15,8 @@ interface GitDiffFileListProps {
   selectedFile: string | null
   /** Source selector (working changes / compare-to-branch) shown in the header. */
   sourceSelect: ReactNode
+  /** Code font-size control (A−/A+) shown in the header toolbar. */
+  fontControl: ReactNode
   /** Called when the user selects a file. */
   onSelect(path: string): void
   /** Called by the manual refresh button. */
@@ -30,6 +32,23 @@ const STATUS_LABELS: Record<GitFileStatus, string> = {
   renamed: 'Renamed',
   copied: 'Copied',
   untracked: 'Untracked'
+}
+
+/** Single-letter status glyphs shown in the per-file chip. */
+const STATUS_LETTERS: Record<GitFileStatus, string> = {
+  added: 'A',
+  modified: 'M',
+  deleted: 'D',
+  renamed: 'R',
+  copied: 'C',
+  untracked: 'U'
+}
+
+/** Split a repo-relative path into its trailing filename and leading directory.
+ * Root-level files (no slash) report '/' so they still show a directory line. */
+function splitPath(path: string): { dir: string; name: string } {
+  const i = path.lastIndexOf('/')
+  return i === -1 ? { dir: '/', name: path } : { dir: path.slice(0, i), name: path.slice(i + 1) }
 }
 
 function statusColor(status: GitFileStatus): string {
@@ -60,6 +79,7 @@ export function GitDiffFileList({
   error,
   selectedFile,
   sourceSelect,
+  fontControl,
   onSelect,
   onRefresh,
   onClose
@@ -74,6 +94,8 @@ export function GitDiffFileList({
       <div className="flex shrink-0 items-start gap-2 border-b border-line-soft p-2">
         <div className="min-w-0 flex-1">{sourceSelect}</div>
         <div className="flex shrink-0 items-center gap-1">
+          {fontControl}
+          <span className="mx-0.5 h-5 w-px shrink-0 bg-line-soft" aria-hidden />
           <IconButton
             tooltip="Refresh"
             size="sm"
@@ -118,31 +140,54 @@ export function GitDiffFileList({
           </div>
         )}
 
-        {files.map((file) => (
-          <button
-            key={file.path}
-            type="button"
-            onClick={() => onSelect(file.path)}
-            className={cn(
-              'flex items-center justify-between gap-2 border-b border-line-soft px-3 py-2 text-left transition-colors duration-150',
-              selectedFile === file.path
-                ? 'bg-orange/10 text-cream'
-                : 'text-cream-dim hover:bg-orange/5 hover:text-cream'
-            )}
-          >
-            <div className="flex min-w-0 flex-col">
-              <span className="truncate font-medium text-body-sm">{file.path}</span>
-              <span className={cn('text-body-2xs uppercase tracking-wide', statusColor(file.status))}>
-                {STATUS_LABELS[file.status]}
+        {files.map((file) => {
+          const selected = selectedFile === file.path
+          const { dir, name } = splitPath(file.path)
+          return (
+            <button
+              key={file.path}
+              type="button"
+              onClick={() => onSelect(file.path)}
+              title={`${STATUS_LABELS[file.status]} · ${file.path}`}
+              className={cn(
+                'group flex items-center gap-2.5 border-l-2 px-3 py-1.5 text-left transition-colors duration-150',
+                selected
+                  ? 'border-orange bg-orange/10'
+                  : 'border-transparent hover:bg-orange/5'
+              )}
+            >
+              <span
+                className={cn(
+                  'w-3.5 shrink-0 text-center font-terminal text-body-sm font-bold',
+                  statusColor(file.status)
+                )}
+              >
+                {STATUS_LETTERS[file.status]}
               </span>
-            </div>
-            <div className="flex shrink-0 items-center gap-1.5 tabular-nums text-body-2xs">
-              {file.insertions > 0 && <span className="text-teal">+{file.insertions}</span>}
-              {file.deletions > 0 && <span className="text-ember">−{file.deletions}</span>}
-              {file.binary && <span className="text-cream-ghost">binary</span>}
-            </div>
-          </button>
-        ))}
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span
+                  className={cn(
+                    'truncate font-medium text-body-sm',
+                    selected ? 'text-cream' : 'text-cream-dim group-hover:text-cream'
+                  )}
+                >
+                  {name}
+                </span>
+                {dir && <span className="truncate text-body-2xs text-cream-ghost">{dir}</span>}
+              </span>
+              <span className="flex shrink-0 items-center gap-1.5 self-center font-terminal text-body-2xs tabular-nums">
+                {file.binary ? (
+                  <span className="text-cream-ghost">bin</span>
+                ) : (
+                  <>
+                    {file.insertions > 0 && <span className="text-teal">+{file.insertions}</span>}
+                    {file.deletions > 0 && <span className="text-ember">−{file.deletions}</span>}
+                  </>
+                )}
+              </span>
+            </button>
+          )
+        })}
       </div>
     </div>
   )

@@ -143,6 +143,19 @@ function pickGitDiffFileListWidth(value: unknown): number {
 
 /**
  * ------------------------------------------------
+ * Pick a persisted Git diff code font size. Optional: undefined means the diff
+ * follows the terminal font size, so a missing value stays undefined (never
+ * coerced to a default). A present number is clamped to the terminal bounds.
+ * @param {unknown} value - Persisted setting value.
+ * @returns {number | undefined} Clamped size in px, or undefined to follow terminal.
+ */
+function pickGitDiffFontSize(value: unknown): number | undefined {
+  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined
+  return clamp(value, FONT_SIZE_BOUNDS.terminal.min, FONT_SIZE_BOUNDS.terminal.max)
+}
+
+/**
+ * ------------------------------------------------
  * Pick a persisted worktree directory.
  * @param {unknown} value - Persisted setting value.
  * @returns {string} Non-empty worktree directory.
@@ -188,6 +201,7 @@ export function normalizeSettings(raw: Partial<Settings> | undefined): Settings 
     terminalBackgroundOpacity: pickTerminalBackgroundOpacity(base.terminalBackgroundOpacity),
     worktreeDirectory: pickWorktreeDirectory(base.worktreeDirectory),
     terminalPanelHeightPct: pickTerminalPanelHeightPct(base.terminalPanelHeightPct),
-    gitDiffFileListWidth: pickGitDiffFileListWidth(base.gitDiffFileListWidth)
+    gitDiffFileListWidth: pickGitDiffFileListWidth(base.gitDiffFileListWidth),
+    gitDiffFontSize: pickGitDiffFontSize(base.gitDiffFontSize)
   }
 }

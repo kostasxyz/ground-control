@@ -52,6 +52,16 @@ export function clampGitDiffFileListWidth(px: number, contentWidth: number): num
   return Math.round(Math.min(Math.max(px, GIT_DIFF_FILE_LIST_MIN), max))
 }
 
+/** Git diff viewer code font-size bounds (px). Mirrors the terminal bounds so
+ *  the diff and terminals share one comfortable range. */
+export const GIT_DIFF_FONT_MIN = 9
+export const GIT_DIFF_FONT_MAX = 24
+
+/** Clamp a Git diff code font size to the supported range. */
+export function clampGitDiffFontSize(px: number): number {
+  return Math.round(Math.min(Math.max(px, GIT_DIFF_FONT_MIN), GIT_DIFF_FONT_MAX))
+}
+
 /** Rail colors assigned round-robin to new projects. */
 export const PROJECT_COLORS = [
   '#ff8636',
