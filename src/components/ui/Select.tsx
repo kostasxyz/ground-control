@@ -14,13 +14,16 @@ import { Icon } from '../Icon'
  */
 
 const triggerVariants = {
+  // Streamlined settings field: flat, slim, accent-tinted — the app's shared
+  // control language (border-line + bg-orange/5), not a raised gradient pill.
   field:
-    'group/trigger flex h-10 cursor-pointer items-center gap-2 rounded-lg border-[0.5px] border-cream/14 bg-linear-to-b/srgb from-[rgba(255,255,255,0.045)] to-[rgba(0,0,0,0.22)] px-3 text-left font-sans text-body text-cream shadow-[inset_0_1px_0_rgba(255,168,96,0.06),0_1px_0_rgba(0,0,0,0.3)] outline-none transition-[border-color,box-shadow,background] duration-150 hover:border-orange/35 hover:from-[rgba(255,255,255,0.06)] hover:to-[rgba(0,0,0,0.2)] focus-visible:border-orange-bright/75 focus-visible:shadow-[0_0_0_3px_rgba(255,134,54,0.15),inset_0_1px_0_rgba(255,168,96,0.08)]',
+    'group/trigger flex h-9 cursor-pointer items-center gap-2 rounded-md border-[0.5px] border-line bg-orange/5 px-3 text-left font-sans text-body text-cream outline-none transition-all duration-150 hover:border-orange/40 hover:bg-orange/[0.09] focus-visible:border-orange-bright/70 focus-visible:bg-orange/[0.09] aria-expanded:border-orange aria-expanded:bg-orange/12',
   bare: 'group/trigger'
 }
 
 const chevronVariants = {
-  field: 'text-cream-dim group-hover/trigger:text-orange-bright',
+  field:
+    'text-cream-dim group-hover/trigger:text-orange-bright group-aria-expanded/trigger:text-orange-bright',
   bare: 'opacity-70'
 }
 

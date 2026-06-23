@@ -182,7 +182,7 @@ export function TerminalBackgroundSettings({ settings, patchSettings }: Props) {
             {imageFilename && (
               <button
                 type="button"
-                className={`${settingsBtn} bg-none`}
+                className={`${settingsBtn} hover:not-disabled:border-ember/45! hover:not-disabled:bg-ember/[0.09]!`}
                 disabled={uploading}
                 onClick={() => void onClearImage()}
               >

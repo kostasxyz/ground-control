@@ -11,4 +11,4 @@ export const settingsUnit = 'text-body-2xs text-cream-ghost'
 export const settingsHint =
   'mt-0.5 ml-[130px] max-w-[340px] text-body-2xs leading-normal text-cream-ghost max-[760px]:ml-0'
 export const settingsBtn =
-  'h-9 cursor-pointer rounded-lg border-[0.5px] border-cream/14 bg-linear-to-b/srgb from-[rgba(255,255,255,0.05)] to-[rgba(0,0,0,0.22)] px-3.5 text-body-sm font-semibold text-cream transition-all duration-150 hover:not-disabled:border-orange/35 disabled:cursor-default disabled:opacity-55'
+  'h-9 cursor-pointer rounded-md border-[0.5px] border-line bg-orange/5 px-3.5 text-body-sm font-semibold text-cream transition-all duration-150 hover:not-disabled:border-orange/40 hover:not-disabled:bg-orange/[0.09] disabled:cursor-default disabled:opacity-55'
