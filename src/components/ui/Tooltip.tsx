@@ -2,8 +2,9 @@ import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
 import type { ComponentProps } from 'react'
 import { cn } from '@/lib/cn'
 
-type Side = 'top' | 'bottom' | 'left' | 'right'
-type Align = 'start' | 'center' | 'end'
+type PositionerProps = ComponentProps<typeof BaseTooltip.Positioner>
+type Side = NonNullable<PositionerProps['side']>
+type Align = NonNullable<PositionerProps['align']>
 
 interface PopupProps extends ComponentProps<typeof BaseTooltip.Popup> {
   /** Edge of the trigger the popup anchors to (defaults to top). */
