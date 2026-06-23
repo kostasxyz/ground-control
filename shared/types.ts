@@ -101,6 +101,10 @@ export interface Settings {
   terminalPanelHeightPct: number
   /** Width (px) of the file list pane in the Git diff viewer. */
   gitDiffFileListWidth?: number
+  /** Diff viewer code/syntax theme (a terminal palette); undefined → follow terminalThemeId. */
+  gitDiffThemeId?: TerminalThemeId
+  /** Diff viewer code font family; undefined → follow terminalFontFamily. */
+  gitDiffFontFamily?: TerminalFontId
   /** Code font size (px) in the Git diff viewer; undefined → follow terminalFontSize. */
   gitDiffFontSize?: number
 }

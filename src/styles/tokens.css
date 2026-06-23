@@ -409,3 +409,36 @@
   --term-background: #000000;
   --statusbar-bg: rgba(0, 0, 0, 0.6);
 }
+
+/* GitHub Dark — GitHub's dark UI palette. Dark-only, so pairedAppTheme() keeps
+   it when the OS flips to light (no github-light sibling). Canvas #0d1117,
+   foreground #e6edf3, signature accent blue #2f81f7 / #58a6ff. */
+:root[data-app-theme='github-dark'] {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface-2: #21262d;
+  --rail: rgba(1, 4, 9, 0.85);
+  --sidebar: rgba(22, 27, 34, 0.72);
+  --orange: #2f81f7; /* primary accent — GitHub blue */
+  --orange-bright: #58a6ff;
+  --orange-deep: #1f6feb;
+  --ember: #f85149; /* hot/danger — GitHub danger red */
+  --gold: #d29922; /* attention yellow */
+  --teal: #3fb950; /* success green */
+  --cream: #e6edf3; /* primary text — fg.default */
+  --cream-dim: #b1bac4; /* fg.muted (lifted for readability) */
+  --cream-ghost: #6e7681; /* fg.subtle */
+  --line: rgba(88, 166, 255, 0.15);
+  --line-soft: rgba(230, 237, 243, 0.08);
+  --line-dark: #010409; /* recessed edge — canvas.inset */
+  --glow: rgba(47, 129, 247, 0.5);
+  --glow-soft: rgba(47, 129, 247, 0.22);
+  --shadow-card: 0 2px 6px -2px rgba(1, 4, 9, 0.5);
+  --highlight-top: rgba(88, 166, 255, 0.05);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(33, 38, 45, 0.55), rgba(13, 17, 23, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(22, 27, 34, 0.4), rgba(13, 17, 23, 0.3));
+  --term-frame: rgba(1, 4, 9, 0.6);
+  --term-background: #0d1117;
+  --statusbar-bg: rgba(13, 17, 23, 0.6);
+}

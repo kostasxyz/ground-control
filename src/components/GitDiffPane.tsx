@@ -59,9 +59,10 @@ export function GitDiffPane({ worktreePath, source, file }: GitDiffPaneProps) {
   const [diff, setDiff] = useState<GitFileDiff | null>(null)
   const [loading, setLoading] = useState(false)
   const [hlReady, setHlReady] = useState(isReady())
-  // Diff colours follow the TERMINAL theme (a shared code surface), not the app
-  // chrome theme — change the terminal theme and the diff restyles with it.
-  const terminalThemeId = useStore((s) => s.settings.terminalThemeId)
+  // Diff syntax colours follow the DIFF-VIEW theme, an independent setting that
+  // falls back to the terminal theme when unset (Settings → Diff view). The
+  // surface bg + font come from --git-diff-* vars set by GitDiffViewer.
+  const diffThemeId = useStore((s) => s.settings.gitDiffThemeId ?? s.settings.terminalThemeId)
   const langId = file ? langForFile(file.path) : null
 
   // Derive stable primitive keys so the effect doesn't fire when the parent
@@ -131,9 +132,9 @@ export function GitDiffPane({ worktreePath, source, file }: GitDiffPaneProps) {
   const highlighted = useMemo(() => {
     if (!diff || !hlReady || !langId) return null
     return diff.hunks.map((hunk) =>
-      hunk.lines.map((line) => tokenizeLine(langId, line.text, terminalThemeId))
+      hunk.lines.map((line) => tokenizeLine(langId, line.text, diffThemeId))
     )
-  }, [diff, hlReady, langId, terminalThemeId])
+  }, [diff, hlReady, langId, diffThemeId])
 
   if (!file) {
     return (
@@ -199,7 +200,10 @@ export function GitDiffPane({ worktreePath, source, file }: GitDiffPaneProps) {
   const { dir, name } = splitPath(file.path)
 
   return (
-    <div className="flex min-w-0 flex-1 flex-col overflow-auto bg-term-bg/70">
+    <div
+      className="flex min-w-0 flex-1 flex-col overflow-auto"
+      style={{ backgroundColor: 'var(--git-diff-bg, var(--term-background))' }}
+    >
       <div className="sticky top-0 z-10 flex h-11 shrink-0 items-center gap-2.5 border-b border-line-soft bg-surface/80 px-4 backdrop-blur-sm">
         <span
           className={cn('shrink-0 font-terminal text-body-sm font-bold', statusColor(file.status))}
@@ -217,7 +221,7 @@ export function GitDiffPane({ worktreePath, source, file }: GitDiffPaneProps) {
         </span>
       </div>
 
-      <div className="min-w-0 flex-1 font-terminal text-[length:var(--git-diff-font-size,var(--terminal-font-size))] leading-[1.5]">
+      <div className="min-w-0 flex-1 font-[family-name:var(--git-diff-font,var(--terminal-font))] text-[length:var(--git-diff-font-size,var(--terminal-font-size))] leading-[1.5]">
         {diff.hunks.map((hunk, hunkIndex) => (
           <div key={hunkIndex}>
             <div className="select-text border-y border-line-soft bg-orange/[0.06] px-3 py-1 text-body-2xs text-cream-ghost">

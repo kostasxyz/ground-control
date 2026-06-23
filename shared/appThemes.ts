@@ -3,9 +3,9 @@
 import type { ColorScheme } from './theme'
 import type { TerminalThemeId } from './terminalThemes'
 
-export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light' | 'synthwave'
+export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light' | 'synthwave' | 'github-dark'
 
-export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord' | 'synthwave'
+export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord' | 'synthwave' | 'github'
 
 export const APP_THEME_ORDER = [
   'ground-control-dark',
@@ -18,7 +18,8 @@ export const APP_THEME_ORDER = [
   'claude-dark',
   'nord',
   'nord-light',
-  'synthwave'
+  'synthwave',
+  'github-dark'
 ] as const satisfies readonly AppThemeId[]
 
 export const DEFAULT_APP_THEME_ID: AppThemeId = 'ground-control-dark'
@@ -132,6 +133,16 @@ const APP_THEMES: Record<AppThemeId, AppTheme> = {
     scheme: 'dark',
     terminalPair: 'synthwave',
     surface: '#0A0A0E'
+  },
+  // GitHub Dark — GitHub's dark UI palette with its signature blue accent
+  // (#2f81f7). Dark-only, so pairedAppTheme() keeps it when the OS flips to
+  // light (no github-light sibling). Pairs with the github-dark terminal palette.
+  'github-dark': {
+    label: 'GitHub Dark',
+    family: 'github',
+    scheme: 'dark',
+    terminalPair: 'github-dark',
+    surface: '#161b22'
   }
 }
 

@@ -156,6 +156,26 @@ function pickGitDiffFontSize(value: unknown): number | undefined {
 
 /**
  * ------------------------------------------------
+ * Pick a persisted diff-view theme id. Optional: undefined means the diff
+ * follows the terminal theme, so an absent/invalid value stays undefined.
+ */
+function pickGitDiffThemeId(value: unknown): TerminalThemeId | undefined {
+  return isTerminalThemeId(value) ? value : undefined
+}
+
+/**
+ * ------------------------------------------------
+ * Pick a persisted diff-view font family. Optional: undefined means the diff
+ * follows the terminal font family, so an absent/invalid value stays undefined.
+ */
+function pickGitDiffFontFamily(value: unknown): TerminalFontId | undefined {
+  return typeof value === 'string' && value in TERMINAL_FONTS
+    ? (value as TerminalFontId)
+    : undefined
+}
+
+/**
+ * ------------------------------------------------
  * Pick a persisted worktree directory.
  * @param {unknown} value - Persisted setting value.
  * @returns {string} Non-empty worktree directory.
@@ -202,6 +222,8 @@ export function normalizeSettings(raw: Partial<Settings> | undefined): Settings 
     worktreeDirectory: pickWorktreeDirectory(base.worktreeDirectory),
     terminalPanelHeightPct: pickTerminalPanelHeightPct(base.terminalPanelHeightPct),
     gitDiffFileListWidth: pickGitDiffFileListWidth(base.gitDiffFileListWidth),
+    gitDiffThemeId: pickGitDiffThemeId(base.gitDiffThemeId),
+    gitDiffFontFamily: pickGitDiffFontFamily(base.gitDiffFontFamily),
     gitDiffFontSize: pickGitDiffFontSize(base.gitDiffFontSize)
   }
 }

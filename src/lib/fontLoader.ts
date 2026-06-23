@@ -178,11 +178,13 @@ export function ensureDefaultFonts(): Promise<void> {
 
 export function ensureFontsForSettings(settings: Pick<
   Settings,
-  'uiHeadingFontFamily' | 'uiBodyFontFamily' | 'terminalFontFamily'
+  'uiHeadingFontFamily' | 'uiBodyFontFamily' | 'terminalFontFamily' | 'gitDiffFontFamily'
 >): Promise<void> {
   return Promise.all([
     loadFont(settings.uiHeadingFontFamily),
     loadFont(BODY_FONT_KEYS[settings.uiBodyFontFamily]),
-    loadFont(TERMINAL_FONT_KEYS[settings.terminalFontFamily])
+    loadFont(TERMINAL_FONT_KEYS[settings.terminalFontFamily]),
+    // Diff font follows the terminal font when unset; load whichever applies.
+    loadFont(TERMINAL_FONT_KEYS[settings.gitDiffFontFamily ?? settings.terminalFontFamily])
   ]).then(() => undefined)
 }

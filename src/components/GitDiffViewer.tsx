@@ -3,6 +3,8 @@ import type { CSSProperties } from 'react'
 import { useStore } from '@/state/store'
 import { selectedWorktreeKey } from '@/state/worktreeScope'
 import type { DiffSource, GitDiffFile } from '@shared/types'
+import { resolveTerminalStack } from '@shared/fonts'
+import { terminalThemePalette } from '@shared/terminalThemes'
 import {
   clampGitDiffFileListWidth,
   clampGitDiffFontSize,
@@ -217,13 +219,18 @@ export function GitDiffViewer() {
     onMove: (delta) => setWidth(width + delta)
   })
 
-  // Diff code font size: a dedicated setting that defaults to the terminal font
-  // size (the diff shares the terminal's mono surface). The A−/A+ buttons step
-  // it independently so zooming the diff never disturbs the terminals.
+  // Diff-view appearance is independent from the terminal but defaults to it
+  // when unset (the diff shares the terminal's mono code surface). Each setting
+  // falls back to its terminal equivalent so existing installs are unchanged
+  // until the user customizes the diff in Settings → Appearance → Diff view.
   const terminalFontSize = useStore((s) => s.settings.terminalFontSize)
   const fontSize = clampGitDiffFontSize(
     useStore((s) => s.settings.gitDiffFontSize) ?? terminalFontSize
   )
+  const diffFontFamily = useStore((s) => s.settings.gitDiffFontFamily ?? s.settings.terminalFontFamily)
+  const diffThemeId = useStore((s) => s.settings.gitDiffThemeId ?? s.settings.terminalThemeId)
+  const fontStack = resolveTerminalStack(diffFontFamily)
+  const diffBackground = terminalThemePalette(diffThemeId).background
 
   const zoomFont = useCallback(
     (delta: number) => patchSettings({ gitDiffFontSize: clampGitDiffFontSize(fontSize + delta) }),
@@ -258,7 +265,9 @@ export function GitDiffViewer() {
       style={
         {
           '--git-diff-list-w': `${width}px`,
-          '--git-diff-font-size': `${fontSize}px`
+          '--git-diff-font-size': `${fontSize}px`,
+          '--git-diff-font': fontStack,
+          '--git-diff-bg': diffBackground
         } as CSSProperties
       }
     >

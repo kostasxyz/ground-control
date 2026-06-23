@@ -88,7 +88,13 @@ const APPEARANCE_KEYS = [
   'terminalFontSize',
   'terminalBackgroundColor',
   'terminalBackgroundImage',
-  'terminalBackgroundOpacity'
+  'terminalBackgroundOpacity',
+  // Diff-view appearance: a change here re-runs applyAppearance so the diff
+  // font webfont is ensured. The diff CSS vars themselves are set per-render by
+  // GitDiffViewer (component-scoped), not here.
+  'gitDiffThemeId',
+  'gitDiffFontFamily',
+  'gitDiffFontSize'
 ] as const satisfies readonly (keyof Settings)[]
 
 /** True when typography/theme fields changed (not layout-only keys like pane width). */

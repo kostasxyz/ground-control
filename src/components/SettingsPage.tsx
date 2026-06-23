@@ -322,6 +322,78 @@ export function SettingsPage() {
                 workspace — or use the console zoom buttons for immediate size changes.
               </p>
             </fieldset>
+
+            <fieldset className="flex flex-col gap-3.5 border-b border-line-soft pb-7 last:border-b-0 last:pb-0">
+              <legend className="mb-0.5 font-display text-heading-sm font-bold text-cream">Diff view</legend>
+              <div className={settingsRow}>
+                <label className={settingsLabel} htmlFor="settings-diff-theme">
+                  Theme
+                </label>
+                <Select.Root
+                  value={settings.gitDiffThemeId ?? settings.terminalThemeId}
+                  onValueChange={(value) =>
+                    patchSettings({ gitDiffThemeId: value as TerminalThemeId })
+                  }
+                  items={TERMINAL_THEME_ORDER.map((id) => ({
+                    value: id,
+                    label: terminalThemeLabel(id)
+                  }))}
+                >
+                  <Select.Trigger id="settings-diff-theme" />
+                  <Select.Popup>
+                    {TERMINAL_THEME_ORDER.map((id) => (
+                      <Select.Item key={id} value={id}>
+                        {terminalThemeLabel(id)}
+                      </Select.Item>
+                    ))}
+                  </Select.Popup>
+                </Select.Root>
+              </div>
+              <div className={settingsRow}>
+                <label className={settingsLabel} htmlFor="settings-diff-font">
+                  Font
+                </label>
+                <Select.Root
+                  value={settings.gitDiffFontFamily ?? settings.terminalFontFamily}
+                  onValueChange={(value) =>
+                    patchSettings({ gitDiffFontFamily: value as TerminalFontId })
+                  }
+                  items={TERMINAL_OPTIONS.map((f) => ({ value: f.id, label: f.label }))}
+                >
+                  <Select.Trigger id="settings-diff-font" />
+                  <Select.Popup>
+                    {TERMINAL_OPTIONS.map((f) => (
+                      <Select.Item key={f.id} value={f.id}>
+                        {f.label}
+                      </Select.Item>
+                    ))}
+                  </Select.Popup>
+                </Select.Root>
+              </div>
+              <label className={settingsRow}>
+                <span className={settingsLabel}>Size</span>
+                <Input
+                  type="number"
+                  min={FONT_SIZE_BOUNDS.terminal.min}
+                  max={FONT_SIZE_BOUNDS.terminal.max}
+                  value={settings.gitDiffFontSize ?? settings.terminalFontSize}
+                  onChange={(e) => {
+                    const n = parseSize(
+                      e.target.value,
+                      FONT_SIZE_BOUNDS.terminal.min,
+                      FONT_SIZE_BOUNDS.terminal.max
+                    )
+                    if (n != null) patchSettings({ gitDiffFontSize: n })
+                  }}
+                />
+                <span className={settingsUnit}>px</span>
+              </label>
+              <p className={settingsHint}>
+                The diff viewer’s code theme, font, and size — independent from the
+                terminal. Each defaults to the terminal’s until you change it. Size
+                also adjusts from the A−/A+ buttons in the diff viewer.
+              </p>
+            </fieldset>
           </div>
         )}
       </section>

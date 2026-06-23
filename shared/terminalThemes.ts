@@ -16,6 +16,7 @@ export type TerminalThemeId =
   | 'nord'
   | 'nord-light'
   | 'synthwave'
+  | 'github-dark'
 export const TERMINAL_THEME_ORDER = [
   'ember-dark',
   'ember-light',
@@ -29,7 +30,8 @@ export const TERMINAL_THEME_ORDER = [
   'claude-dark',
   'nord',
   'nord-light',
-  'synthwave'
+  'synthwave',
+  'github-dark'
 ] as const satisfies readonly TerminalThemeId[]
 
 export const DEFAULT_TERMINAL_THEME_ID: TerminalThemeId = 'ember-dark'
@@ -73,7 +75,8 @@ const TERMINAL_THEME_LABELS: Record<TerminalThemeId, string> = {
   'claude-dark': 'Claude Dark',
   nord: 'Nord',
   'nord-light': 'Nord Light',
-  synthwave: 'Synthwave'
+  synthwave: 'Synthwave',
+  'github-dark': 'GitHub Dark'
 }
 
 const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
@@ -392,6 +395,32 @@ const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
     brightMagenta: '#F97137',
     brightCyan: '#19CDE6',
     brightWhite: '#FFFFFF'
+  },
+  // GitHub Dark — the official GitHub Dark iTerm palette. Canvas #101216,
+  // foreground #8b949e. brightBlack is lifted to GitHub's muted gray (#6e7681)
+  // so diff comments (mapped to brightBlack) stay readable on the dark canvas.
+  'github-dark': {
+    background: '#101216',
+    foreground: '#8b949e',
+    cursor: '#c9d1d9',
+    cursorAccent: '#101216',
+    selectionBackground: 'rgba(56, 80, 112, 0.45)',
+    black: '#000000',
+    red: '#f78166',
+    green: '#56d364',
+    yellow: '#e3b341',
+    blue: '#6ca4f8',
+    magenta: '#db61a2',
+    cyan: '#2b7489',
+    white: '#ffffff',
+    brightBlack: '#6e7681',
+    brightRed: '#f78166',
+    brightGreen: '#56d364',
+    brightYellow: '#e3b341',
+    brightBlue: '#6ca4f8',
+    brightMagenta: '#db61a2',
+    brightCyan: '#2b7489',
+    brightWhite: '#ffffff'
   }
 }
 
