@@ -1,5 +1,6 @@
 import { useStore } from '@/state/store'
 import { initials } from '@/lib/constants'
+import { Tooltip } from '@/components/ui/Tooltip'
 
 const railIc =
   'relative flex h-[27px] w-[27px] cursor-pointer items-center justify-center rounded-[6px] border-[0.5px] border-transparent font-extrabold transition-all duration-150'
@@ -28,26 +29,39 @@ export function IconRail({ hidden = false }: { hidden?: boolean }) {
         .map((p) => {
           const selected = p.id === activeProjectId
           return (
-            <button
-              key={p.id}
-              className={`${railIc} font-display text-heading-2xs ${selected ? railIcSelected : railIcIdle}`}
-              title={p.name}
-              style={
-                !selected && p.color ? { color: p.color } : undefined
-              }
-              onClick={() => selectProject(p.id)}
-            >
-              {initials(p.name)}
-            </button>
+            <Tooltip.Root key={p.id}>
+              <Tooltip.Trigger
+                render={
+                  <button
+                    className={`${railIc} font-display text-heading-2xs ${selected ? railIcSelected : railIcIdle}`}
+                    aria-label={p.name}
+                    style={
+                      !selected && p.color ? { color: p.color } : undefined
+                    }
+                    onClick={() => selectProject(p.id)}
+                  >
+                    {initials(p.name)}
+                  </button>
+                }
+              />
+              <Tooltip.Popup side="right">{p.name}</Tooltip.Popup>
+            </Tooltip.Root>
           )
         })}
-      <button
-        className={`${railIc} ${railIcIdle} font-sans text-heading`}
-        title="New workspace"
-        onClick={() => void addProject()}
-      >
-        +
-      </button>
+      <Tooltip.Root>
+        <Tooltip.Trigger
+          render={
+            <button
+              className={`${railIc} ${railIcIdle} font-sans text-heading`}
+              aria-label="New workspace"
+              onClick={() => void addProject()}
+            >
+              +
+            </button>
+          }
+        />
+        <Tooltip.Popup side="right">New workspace</Tooltip.Popup>
+      </Tooltip.Root>
     </aside>
   )
 }
