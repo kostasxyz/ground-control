@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "ground-control",
+  "productName": "Ground Control",
   "version": "0.1.0",
   "identifier": "com.groundcontrol.taurispike",
   "build": {
