@@ -3,7 +3,7 @@ import type { CSSProperties } from 'react'
 import { useStore } from '@/state/store'
 import { selectedWorktreeKey, visibleTerminals } from '@/state/worktreeScope'
 import { clampTerminalPanelPct, TERMINAL_PANEL_DEFAULT_PCT } from '@shared/settings'
-import { MAX_SHELL_TERMINALS } from '@/lib/constants'
+import { MAX_SHELL_TERMINALS, TERMINAL_PANEL_ANIM_MS } from '@/lib/constants'
 import { useResizeHandle, ResizeHandle } from '@/components/ui/ResizeHandle'
 import { Icon } from '@/components/Icon'
 import { Button } from '@/components/ui/Button'
@@ -73,11 +73,12 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
     <div
       // The slide: the panel's share is a flex-grow ratio, which animates.
       className={`flex min-h-0 flex-col bg-statusbar ${
-        dragging ? 'transition-none' : 'transition-[flex-grow] duration-[160ms] ease-[ease]'
+        dragging ? 'transition-none' : 'transition-[flex-grow] ease-[ease]'
       }`}
       style={
         {
           display: hidden ? 'none' : undefined,
+          transitionDuration: `${TERMINAL_PANEL_ANIM_MS}ms`,
           // Closed: exactly the bar. Open: bar + divider as basis, panel from grow.
           flex: open ? `${grow} 0 41px` : '0 0 40px'
         } as CSSProperties

@@ -23,6 +23,9 @@ export const MAX_LIVE_SESSIONS = 10
  *  xterm DOM accumulation; gates the dock's + New. No eviction logic. */
 export const MAX_SHELL_TERMINALS = 6
 
+/** Project terminals dock open/close animation duration (ms). */
+export const TERMINAL_PANEL_ANIM_MS = 160
+
 /** Sessions↔console split (px). The sessions pane is width-controlled and
  *  drag-resizable; the console takes the remainder. Persisted in settings. */
 export const SESSIONS_PANE_DEFAULT = 360

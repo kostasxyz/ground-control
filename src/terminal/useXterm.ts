@@ -4,6 +4,7 @@ import { FitAddon } from '@xterm/addon-fit'
 import { CanvasAddon } from '@xterm/addon-canvas'
 import { resolveTerminalStack } from '@shared/fonts'
 import { useStore } from '@/state/store'
+import { TERMINAL_PANEL_ANIM_MS } from '@/lib/constants'
 import { buildXtermTheme } from './xtermTheme'
 import { registerTerminal, unregisterTerminal } from './registry'
 
@@ -12,6 +13,37 @@ import { registerTerminal, unregisterTerminal } from './registry'
 // "insert newline" (PLAN §5.4); harmless in a plain shell. The default unless a
 // terminal overrides it via `newlineSeq` (pi keys off Shift+Enter — useTerminal).
 const DEFAULT_NEWLINE = '\x1b\r'
+const LAYOUT_SETTLE_BUFFER_MS = 40
+const LAYOUT_SETTLE_MS = TERMINAL_PANEL_ANIM_MS + LAYOUT_SETTLE_BUFFER_MS
+
+/**
+ * ------------------------------------------------
+ * Check that the terminal host and its ancestors have a visible layout box.
+ * @param {HTMLElement} element - Terminal host element.
+ * @returns {boolean} True when fitting can use the real visible size.
+ */
+function hasMeasurableLayout(element: HTMLElement): boolean {
+  for (let current: HTMLElement | null = element; current; current = current.parentElement) {
+    if (current.clientWidth <= 0 || current.clientHeight <= 0) return false
+    if (current === document.body) return true
+  }
+  return false
+}
+
+/**
+ * ------------------------------------------------
+ * Collect the terminal host and ancestors that can reveal or clip it.
+ * @param {HTMLElement} element - Terminal host element.
+ * @returns {HTMLElement[]} Elements to watch for layout changes.
+ */
+function layoutObserverElements(element: HTMLElement): HTMLElement[] {
+  const elements: HTMLElement[] = []
+  for (let current: HTMLElement | null = element; current; current = current.parentElement) {
+    elements.push(current)
+    if (current === document.body) break
+  }
+  return elements
+}
 
 /** How a terminal's bytes get to and from its PTY (gc.session.* or gc.terminal.*). */
 export interface XtermIo {
@@ -150,12 +182,12 @@ export function useXterm(opts: XtermOptions): XtermHandles {
     term.onData((d) => io.write(id, d))
     term.onResize(({ cols, rows }) => io.resize(id, cols, rows))
 
-    // fit() on a zero-height container doesn't throw — the FitAddon clamps to
-    // its minimum rows/cols and resizes the PTY down with it (collapsed panel
-    // → 1-row shells). Only fit when the container has a measurable box; the
-    // observer fires again when it regains one.
+    // fit() on a zero-height/clipped container doesn't throw — the FitAddon
+    // clamps to its minimum rows/cols and resizes the PTY down with it
+    // (collapsed panel → 1-row shells). Only fit when the container and its
+    // ancestors have measurable boxes; the observer fires again when visible.
     const safeFit = (): void => {
-      if (!container.clientWidth || !container.clientHeight) return
+      if (!hasMeasurableLayout(container)) return
       try {
         fit.fit()
       } catch {
@@ -165,7 +197,7 @@ export function useXterm(opts: XtermOptions): XtermHandles {
 
     let spawnFitRetries = 0
     const spawnWhenReady = (): void => {
-      if (spawnedRef.current || !container.clientWidth || !container.clientHeight) return
+      if (spawnedRef.current || !hasMeasurableLayout(container)) return
       safeFit()
       if (term.rows <= 1 && spawnFitRetries < 20) {
         spawnFitRetries += 1
@@ -183,20 +215,46 @@ export function useXterm(opts: XtermOptions): XtermHandles {
         clearTimeout(spawnTimer)
         spawnTimer = null
       }
-      if (!container.clientWidth || !container.clientHeight) return
+      if (!hasMeasurableLayout(container)) return
       const width = container.clientWidth
       const height = container.clientHeight
       spawnTimer = setTimeout(() => {
         spawnTimer = null
-        if (!alive || spawnedRef.current || !container.clientWidth || !container.clientHeight) return
+        if (!alive || spawnedRef.current || !hasMeasurableLayout(container)) return
         if (container.clientWidth !== width || container.clientHeight !== height) {
           queueSpawnWhenReady()
           return
         }
         spawnWhenReady()
-      }, 80)
+      }, LAYOUT_SETTLE_MS)
     }
     spawnWhenReadyRef.current = queueSpawnWhenReady
+
+    // Refit only on a settled size. The dock animates its height (flex-grow over
+    // the shared TERMINAL_PANEL_ANIM_MS) when the Project Terminals panel toggles,
+    // and a divider drag streams sizes continuously; fitting on every intermediate
+    // frame walked the live PTY down to ~1 row and back, making shells reprint their
+    // prompt on each toggle (the "terminals respawn on pane toggle" bug). Waiting
+    // for quiescence means a collapse settles at 0 (skipped — PTY keeps its rows)
+    // and the matching expand fits back to the same rows → no resize, no reprint.
+    let fitTimer: ReturnType<typeof setTimeout> | null = null
+    const queueFit = (): void => {
+      if (fitTimer) clearTimeout(fitTimer)
+      if (!hasMeasurableLayout(container)) return
+      const width = container.clientWidth
+      const height = container.clientHeight
+      fitTimer = setTimeout(() => {
+        fitTimer = null
+        if (!alive || !hasMeasurableLayout(container)) return
+        // Still moving (mid-animation/drag) — wait for the size to settle so the
+        // PTY only ever resizes to a steady layout, never a transient frame.
+        if (container.clientWidth !== width || container.clientHeight !== height) {
+          queueFit()
+          return
+        }
+        safeFit()
+      }, LAYOUT_SETTLE_MS)
+    }
 
     const ro = new ResizeObserver(() => {
       if (!spawnedRef.current) {
@@ -204,9 +262,9 @@ export function useXterm(opts: XtermOptions): XtermHandles {
         return
       }
       if (!activeRef.current) return
-      safeFit()
+      queueFit()
     })
-    ro.observe(container)
+    for (const element of layoutObserverElements(container)) ro.observe(element)
 
     // Fit to the real container, then spawn at the right size. If the container
     // has no measurable box yet (pre-layout, or a collapsed/hidden panel), keep
@@ -217,6 +275,7 @@ export function useXterm(opts: XtermOptions): XtermHandles {
     return () => {
       alive = false
       if (spawnTimer) clearTimeout(spawnTimer)
+      if (fitTimer) clearTimeout(fitTimer)
       ro.disconnect()
       offData()
       offExit()
@@ -252,7 +311,7 @@ export function useXterm(opts: XtermOptions): XtermHandles {
     const raf = requestAnimationFrame(() => {
       spawnWhenReadyRef.current()
       const container = containerRef.current
-      if (container && container.clientWidth && container.clientHeight) {
+      if (container && hasMeasurableLayout(container)) {
         try {
           fitRef.current?.fit()
         } catch {
