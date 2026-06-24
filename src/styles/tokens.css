@@ -442,3 +442,40 @@
   --term-background: #0d1117;
   --statusbar-bg: rgba(13, 17, 23, 0.6);
 }
+
+/* Dark Forrest — a dark, green-tinted cockpit palette. Distinct (app-theme only,
+   no bundled terminal/diff theme): applyTheme() sets data-app-theme='dark-forrest'
+   and this block overrides the color/surface tokens only. Dark scheme, so
+   data-theme='dark' and the light block never matches. Anchors: terracotta primary
+   #E0845F (CTA / cursor / focus), teal secondary #46CDBE (branch refs / links),
+   near-black green-tinted background #080B0A, foreground #E7E9E6. Pairs with the
+   claude-dark terminal palette (terracotta cursor). */
+:root[data-app-theme='dark-forrest'] {
+  --bg: #080b0a;
+  --surface: #0c100e;
+  --surface-2: #121815;
+  --rail: rgba(8, 11, 10, 0.85);
+  --sidebar: rgba(12, 16, 14, 0.72);
+  --orange: #e0845f; /* primary accent — terracotta (CTA / cursor / focus ring) */
+  --orange-bright: #ec9a78;
+  --orange-deep: #d97757; /* terracotta pressed */
+  --ember: #e0705c; /* hot/danger — true red */
+  --gold: #d9a85f; /* warning — amber */
+  --teal: #46cdbe; /* secondary — teal (branch refs / links / live status) */
+  --cream: #e7e9e6; /* primary text */
+  --cream-dim: #8a948e; /* secondary text */
+  --cream-ghost: #6c7670; /* tertiary text, icons */
+  --line: rgba(224, 132, 95, 0.15);
+  --line-soft: rgba(231, 233, 230, 0.08);
+  --line-dark: #040605; /* recessed edge, darker than --bg */
+  --glow: rgba(224, 132, 95, 0.5);
+  --glow-soft: rgba(224, 132, 95, 0.22);
+  --shadow-card: 0 2px 6px -2px rgba(0, 0, 0, 0.5);
+  --highlight-top: rgba(224, 132, 95, 0.05);
+
+  --grad-titlebar: linear-gradient(180deg, rgba(18, 24, 21, 0.55), rgba(8, 11, 10, 0.2));
+  --grad-content: linear-gradient(180deg, rgba(12, 16, 14, 0.4), rgba(8, 11, 10, 0.3));
+  --term-frame: rgba(5, 7, 6, 0.6);
+  --term-background: #080b0a;
+  --statusbar-bg: rgba(8, 11, 10, 0.6);
+}

@@ -3,9 +3,9 @@
 import type { ColorScheme } from './theme'
 import type { TerminalThemeId } from './terminalThemes'
 
-export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light' | 'synthwave' | 'github-dark'
+export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light' | 'synthwave' | 'github-dark' | 'dark-forrest'
 
-export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord' | 'synthwave' | 'github'
+export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord' | 'synthwave' | 'github' | 'dark-forrest'
 
 export const APP_THEME_ORDER = [
   'ground-control-dark',
@@ -19,7 +19,8 @@ export const APP_THEME_ORDER = [
   'nord',
   'nord-light',
   'synthwave',
-  'github-dark'
+  'github-dark',
+  'dark-forrest'
 ] as const satisfies readonly AppThemeId[]
 
 export const DEFAULT_APP_THEME_ID: AppThemeId = 'ground-control-dark'
@@ -143,6 +144,17 @@ const APP_THEMES: Record<AppThemeId, AppTheme> = {
     scheme: 'dark',
     terminalPair: 'github-dark',
     surface: '#161b22'
+  },
+  // Dark Forrest — dark, green-tinted cockpit palette with a terracotta primary
+  // and teal secondary. Distinct palette (app-theme only, no bundled terminal),
+  // so it pairs with the existing claude-dark terminal (terracotta cursor).
+  // Dark-only, so pairedAppTheme() keeps it when the OS flips to light.
+  'dark-forrest': {
+    label: 'Dark Forrest',
+    family: 'dark-forrest',
+    scheme: 'dark',
+    terminalPair: 'claude-dark',
+    surface: '#0c100e'
   }
 }
 
