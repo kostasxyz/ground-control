@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { useStore } from '@/state/store'
 import { initials } from '@/lib/constants'
 import { Tooltip } from '@/components/ui/Tooltip'
@@ -24,30 +25,36 @@ export function IconRail({ hidden = false }: { hidden?: boolean }) {
 
   return (
     <aside className="flex w-[39px] shrink-0 flex-col items-center gap-2 border-r border-line bg-rail py-2.5 backdrop-blur-[30px]">
-      {projects
-        .filter((p) => !p.archived && (p.pinned || p.id === activeProjectId))
-        .map((p) => {
-          const selected = p.id === activeProjectId
-          return (
-            <Tooltip.Root key={p.id}>
-              <Tooltip.Trigger
-                render={
-                  <button
-                    className={`${railIc} font-display text-heading-2xs ${selected ? railIcSelected : railIcIdle}`}
-                    aria-label={p.name}
-                    style={
-                      !selected && p.color ? { color: p.color } : undefined
+      <div className="flex w-full flex-col items-center gap-2">
+        {projects
+          .filter((p) => !p.archived && (p.pinned || p.id === activeProjectId))
+          .map((p, i) => {
+            const selected = p.id === activeProjectId
+            return (
+              <Fragment key={p.id}>
+                {/* Separator between pinned projects (skipped before the first). */}
+                {i > 0 && <span aria-hidden className="h-px w-6 bg-line-soft" />}
+                <Tooltip.Root>
+                  <Tooltip.Trigger
+                    render={
+                      <button
+                        className={`${railIc} font-display text-heading-2xs ${selected ? railIcSelected : railIcIdle}`}
+                        aria-label={p.name}
+                        style={
+                          !selected && p.color ? { color: p.color } : undefined
+                        }
+                        onClick={() => selectProject(p.id)}
+                      >
+                        {initials(p.name)}
+                      </button>
                     }
-                    onClick={() => selectProject(p.id)}
-                  >
-                    {initials(p.name)}
-                  </button>
-                }
-              />
-              <Tooltip.Popup side="right">{p.name}</Tooltip.Popup>
-            </Tooltip.Root>
-          )
-        })}
+                  />
+                  <Tooltip.Popup side="right">{p.name}</Tooltip.Popup>
+                </Tooltip.Root>
+              </Fragment>
+            )
+          })}
+      </div>
       <Tooltip.Root>
         <Tooltip.Trigger
           render={

@@ -108,8 +108,15 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
               }${t.visible ? '' : ' opacity-55' /* hidden: dimmed chip, PTY still runs */}`}
               title={t.visible ? t.title : `${t.title} (hidden — still running)`}
               onClick={() => {
+                // Clicking the already-focused tab while the panel is open
+                // toggles it closed; otherwise open (if needed) and focus this
+                // terminal (re-shows a hidden column — ADR-006).
+                if (open && t.id === focusedShellTerminalId) {
+                  setOpen(false)
+                  return
+                }
                 setOpen(true)
-                focusShellTerminal(t.id) // re-shows the column if hidden (ADR-006)
+                focusShellTerminal(t.id)
               }}
             >
               <Icon name="terminal" size={11} className="shrink-0" />
