@@ -5,6 +5,9 @@ import App from './App'
 import { ensureDefaultFonts } from './lib/fontLoader'
 
 import '@xterm/xterm/css/xterm.css'
+// Icon-only Nerd Font face (symbols); appended to every terminal stack in
+// shared/fonts.ts so agent-CLI glyphs render instead of xterm's missing-glyph "?".
+import '@azurity/pure-nerd-font/pure-nerd-font.css'
 import './styles/tokens.css'
 import './styles/global.css'
 

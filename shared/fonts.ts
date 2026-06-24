@@ -125,6 +125,14 @@ export function resolveBodyStack(id: BodyFontId): string {
   return UI_BODY_FONTS[id].stack
 }
 
+/** Icon-only Nerd Font appended to every terminal stack. Agent CLIs (Claude,
+ *  Codex, Cursor) emit Nerd Font / PUA glyphs for spinners, cost, clock, …; the
+ *  plain @fontsource terminal faces lack them, so xterm drew the missing-glyph
+ *  "?". This Symbols-only face fills exactly those glyphs and nothing else, so
+ *  it never displaces the chosen terminal font. Registered + force-loaded via
+ *  src/lib/fontLoader.ts; @font-face lives in main.tsx's CSS import. */
+export const TERMINAL_ICON_FONT_FAMILY = 'Pure Nerd Font'
+
 export function resolveTerminalStack(id: TerminalFontId): string {
-  return TERMINAL_FONTS[id].stack
+  return `${TERMINAL_FONTS[id].stack}, '${TERMINAL_ICON_FONT_FAMILY}'`
 }

@@ -1,6 +1,11 @@
 import type { Settings } from '@shared/types'
 import { DEFAULT_SETTINGS } from '@shared/settings'
-import type { BodyFontId, HeadingFontId, TerminalFontId } from '@shared/fonts'
+import {
+  TERMINAL_ICON_FONT_FAMILY,
+  type BodyFontId,
+  type HeadingFontId,
+  type TerminalFontId
+} from '@shared/fonts'
 
 type FontLoader = () => Promise<unknown>
 
@@ -172,6 +177,30 @@ function loadFont(key: FontKey | null): Promise<void> {
   return promise
 }
 
+let iconFontPromise: Promise<void> | null = null
+
+/**
+ * ------------------------------------------------
+ * Force-load the terminal icon font so xterm's first write already has the
+ * glyphs. xterm never repaints when a @font-face finishes loading late, so an
+ * icon emitted before the face is decoded renders as the missing-glyph "?" and
+ * stays that way. The @font-face is registered by the static CSS import in
+ * main.tsx; this just triggers its fetch/decode ahead of the PTY spawn.
+ * @returns {Promise<void>} Resolves once the icon face is decoded, or on error.
+ */
+function loadTerminalIconFont(): Promise<void> {
+  if (iconFontPromise) return iconFontPromise
+  iconFontPromise = (async () => {
+    if (typeof document === 'undefined' || !document.fonts) return
+    try {
+      await document.fonts.load(`16px '${TERMINAL_ICON_FONT_FAMILY}'`)
+    } catch {
+      /* FontFace API missing or face unavailable — degrade to fallback "?" */
+    }
+  })()
+  return iconFontPromise
+}
+
 export function ensureDefaultFonts(): Promise<void> {
   return ensureFontsForSettings(DEFAULT_SETTINGS)
 }
@@ -185,6 +214,8 @@ export function ensureFontsForSettings(settings: Pick<
     loadFont(BODY_FONT_KEYS[settings.uiBodyFontFamily]),
     loadFont(TERMINAL_FONT_KEYS[settings.terminalFontFamily]),
     // Diff font follows the terminal font when unset; load whichever applies.
-    loadFont(TERMINAL_FONT_KEYS[settings.gitDiffFontFamily ?? settings.terminalFontFamily])
+    loadFont(TERMINAL_FONT_KEYS[settings.gitDiffFontFamily ?? settings.terminalFontFamily]),
+    // Icon font is terminal-agnostic (covers every terminal font); load once.
+    loadTerminalIconFont()
   ]).then(() => undefined)
 }
