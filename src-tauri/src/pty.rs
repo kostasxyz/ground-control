@@ -465,6 +465,7 @@ pub async fn session_spawn(app: AppHandle, opts: SpawnOptions) -> SpawnResult {
 
 #[tauri::command]
 pub async fn terminal_spawn(app: AppHandle, opts: ShellSpawnOptions) -> SpawnResult {
+    eprintln!("[GC-DBG] terminal_spawn id={} {}x{}", opts.id, opts.cols, opts.rows);
     tauri::async_runtime::spawn_blocking(move || app.state::<PtyManager>().spawn_shell(&app, opts))
         .await
         .unwrap_or_else(|_| SpawnResult::err("spawn task failed"))
@@ -492,10 +493,12 @@ pub fn terminal_write(state: State<'_, PtyManager>, id: String, data: String) {
 
 #[tauri::command]
 pub fn terminal_resize(state: State<'_, PtyManager>, id: String, cols: u16, rows: u16) {
+    eprintln!("[GC-DBG] terminal_resize id={id} {cols}x{rows}");
     state.resize(&id, cols, rows);
 }
 
 #[tauri::command]
 pub fn terminal_kill(state: State<'_, PtyManager>, id: String) {
+    eprintln!("[GC-DBG] terminal_kill id={id}");
     state.kill(&id);
 }
