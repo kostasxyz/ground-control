@@ -8,10 +8,10 @@ import { TERMINAL_PANEL_ANIM_MS } from '@/lib/constants'
 import { buildXtermTheme } from './xtermTheme'
 import { registerTerminal, unregisterTerminal } from './registry'
 
-// OS-modifier + Enter inserts a newline instead of submitting. ESC+CR is the
+// Shift+Enter inserts a newline instead of submitting. ESC+CR is the
 // "Alt/Option+Enter" sequence most agent CLIs (Claude, Codex, …) treat as
-// "insert newline" (PLAN §5.4); harmless in a plain shell. The default unless a
-// terminal overrides it via `newlineSeq` (pi keys off Shift+Enter — useTerminal).
+// "insert newline"; harmless in a plain shell. The default unless a terminal
+// overrides it via `newlineSeq` (pi reads the kitty Shift+Enter CSI — useTerminal).
 const DEFAULT_NEWLINE = '\x1b\r'
 const LAYOUT_SETTLE_BUFFER_MS = 40
 const LAYOUT_SETTLE_MS = TERMINAL_PANEL_ANIM_MS + LAYOUT_SETTLE_BUFFER_MS
@@ -73,8 +73,8 @@ export interface XtermOptions {
   spawn: (cols: number, rows: number) => void
   /** Hook xterm setup before the PTY exists (key handlers etc.). */
   setup?: (term: Terminal) => void
-  /** Bytes written on OS-modifier+Enter to insert a newline. Defaults to
-   *  ESC+CR; agents that read a different sequence (pi) override it. */
+  /** Bytes written on Shift+Enter to insert a newline. Defaults to ESC+CR;
+   *  agents that read a different sequence (pi) override it. */
   newlineSeq?: string
 }
 
@@ -153,19 +153,63 @@ export function useXterm(opts: XtermOptions): XtermHandles {
 
     cbRef.current.setup?.(term)
 
-    // OS-modifier (⌘ on macOS, Ctrl elsewhere) + Enter → newline, for every
-    // terminal — agent and shell alike. Must run before xterm's default Enter.
+    // Global terminal keymaps for every terminal — agent and shell alike.
+    // Runs before xterm's default key handling.
     const isMac = window.gc.system.platform === 'darwin'
     term.attachCustomKeyEventHandler((e) => {
-      if (
-        e.type === 'keydown' &&
-        e.key === 'Enter' &&
-        (isMac ? e.metaKey : e.ctrlKey) &&
-        !e.altKey
-      ) {
+      if (e.type !== 'keydown') return true
+
+      // Shift+Enter → insert a newline instead of submitting. Byte sequence is
+      // per-terminal: ESC+CR by default (what Claude/Codex/… read as "newline"),
+      // or `newlineSeq` for agents with their own (pi → the kitty Shift+Enter
+      // CSI). preventDefault so the off-screen helper textarea doesn't also keep
+      // a stray newline.
+      if (e.key === 'Enter' && e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault()
         io.write(id, cbRef.current.newlineSeq ?? DEFAULT_NEWLINE)
         return false
       }
+
+      // Copy/paste using each OS's native terminal convention:
+      //   macOS:         ⌘C / ⌘V
+      //   Linux/Windows: Ctrl+Shift+C / Ctrl+Shift+V — so plain Ctrl+C still
+      //                  sends SIGINT and plain Ctrl+V stays the shell's
+      //                  literal-next (^V).
+      const clipMod = isMac
+        ? e.metaKey && !e.ctrlKey && !e.shiftKey && !e.altKey
+        : e.ctrlKey && e.shiftKey && !e.metaKey && !e.altKey
+      if (clipMod) {
+        const key = e.key.toLowerCase()
+        // Copy: xterm holds its selection in its own render layer (invisible to
+        // the DOM), so the browser's native copy can't see it — do it by hand,
+        // and preventDefault so the native (empty) copy can't clobber it. With
+        // no selection, pass through (a harmless no-op).
+        if (key === 'c') {
+          const selection = term.getSelection()
+          if (!selection) return true
+          e.preventDefault()
+          void navigator.clipboard?.writeText(selection).catch(() => {})
+          return false
+        }
+        if (key === 'v') {
+          // macOS ⌘V is the browser's native paste binding: return false to stop
+          // xterm re-emitting the key and let the native paste event flow into
+          // xterm's own handler (bracketed paste). Don't preventDefault.
+          if (isMac) return false
+          // Ctrl+Shift+V is NOT a native paste binding, so read the clipboard
+          // ourselves and feed xterm's bracketed paste. preventDefault guards
+          // against any native paste also firing (no double paste).
+          e.preventDefault()
+          void navigator.clipboard
+            ?.readText()
+            .then((text) => {
+              if (text) term.paste(text)
+            })
+            .catch(() => {})
+          return false
+        }
+      }
+
       return true
     })
 
