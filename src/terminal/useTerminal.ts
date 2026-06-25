@@ -7,7 +7,7 @@ import { useXterm, type XtermIo } from './useXterm'
 const ALT_SCREEN = '\x1b[?1049h'
 const REVEAL_FALLBACK_MS = 2500
 
-// Per-agent override for the OS-modifier+Enter newline byte sequence (default is
+// Per-agent override for the Shift+Enter newline byte sequence (default is
 // ESC+CR, in useXterm). pi's only newline binding is Shift+Enter, which it reads
 // as the kitty-protocol CSI sequence `\x1b[13;2u` (enter=13, shift=2) — parsed
 // regardless of whether the terminal negotiated the kitty keyboard protocol.
@@ -39,7 +39,7 @@ export interface TerminalOptions {
 /**
  * An agent session terminal: the shared xterm core (`useXterm`) plus the
  * agent-only layer — spawn over `gc.session`, ALT_SCREEN reveal, and the reveal
- * fallback timer. (OS-modifier+Enter newline lives in the shared core.)
+ * fallback timer. (Shift+Enter newline and copy/paste live in the shared core.)
  */
 export function useTerminal(opts: TerminalOptions) {
   // Latest callbacks/flags without retriggering anything mount-once.
