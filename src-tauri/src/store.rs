@@ -57,7 +57,7 @@ fn normalize_project(mut v: Value) -> Value {
 
 fn normalize_session(v: Value) -> Value {
     let agent = str_field(&v, "agent")
-        .filter(|a| matches!(*a, "claude" | "pi" | "codex" | "opencode" | "cursor"))
+        .filter(|a| matches!(*a, "claude" | "pi" | "codex" | "opencode" | "cursor" | "droid"))
         .unwrap_or("claude");
     let agent_session_id = v
         .get("agentSessionId")

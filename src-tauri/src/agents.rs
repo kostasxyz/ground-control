@@ -9,7 +9,7 @@ use crate::model::AgentInfo;
 // resumable session id is acquired (assign / precreate / discover) and how the
 // CLI is invoked fresh vs resume.
 
-pub const AGENT_IDS: [&str; 5] = ["claude", "pi", "codex", "opencode", "cursor"];
+pub const AGENT_IDS: [&str; 6] = ["claude", "pi", "codex", "opencode", "cursor", "droid"];
 
 /// The binary name to look up for an agent id.
 pub fn agent_bin(id: &str) -> Option<&'static str> {
@@ -19,6 +19,7 @@ pub fn agent_bin(id: &str) -> Option<&'static str> {
         "codex" => Some("codex"),
         "opencode" => Some("opencode"),
         "cursor" => Some("cursor-agent"),
+        "droid" => Some("droid"),
         _ => None,
     }
 }
@@ -67,6 +68,7 @@ pub enum IdWatch {
     None,
     Codex,
     Opencode,
+    Droid,
 }
 
 pub struct SpawnPlan {
@@ -175,6 +177,23 @@ pub fn plan_spawn(
                     argv: vec![],
                     emit_id: None,
                     watch: IdWatch::Opencode,
+                }
+            }
+        }
+        // droid mints its id on first message (discover); a fresh launch runs bare
+        // and we watch ~/.factory/sessions for the new record, resume via --resume.
+        "droid" => {
+            if resuming {
+                SpawnPlan {
+                    argv: vec!["--resume".into(), sid.into()],
+                    emit_id: None,
+                    watch: IdWatch::None,
+                }
+            } else {
+                SpawnPlan {
+                    argv: vec![],
+                    emit_id: None,
+                    watch: IdWatch::Droid,
                 }
             }
         }

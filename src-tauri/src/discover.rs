@@ -4,9 +4,9 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 // --- Discover-strategy id watchers (port of electron/main/discover.ts) -------
-// codex and opencode mint their session id lazily, on the FIRST user message.
-// We watch each tool's own store until a record whose cwd matches ours appears,
-// then lift its id.
+// codex, opencode and droid mint their session id lazily, on the FIRST user
+// message. We watch each tool's own store until a record whose cwd matches ours
+// appears, then lift its id.
 
 const MAX_WATCH_MS: u128 = 30 * 60 * 1000;
 const POLL_MS: u64 = 400;
@@ -149,6 +149,54 @@ fn opencode_candidates(at: u128) -> Vec<Candidate> {
     out
 }
 
+/// droid (Factory): ~/.factory/sessions/<cwd-slug>/<uuid>.jsonl; the first line
+/// is a `session_start` record carrying top-level { id, cwd } (schema version 2).
+/// We walk the per-project slug dirs and gate on mtime; cwd matching is done by
+/// the generic `watch` against the record's own cwd, so the slug encoding never
+/// has to be reproduced here.
+fn droid_candidates(at: u128) -> Vec<Candidate> {
+    let mut out = Vec::new();
+    let root = home().join(".factory").join("sessions");
+    for project in read_dirs(&root) {
+        let Ok(entries) = fs::read_dir(&project) else {
+            continue;
+        };
+        for entry in entries.flatten() {
+            let name = entry.file_name().to_string_lossy().into_owned();
+            // Skip the sibling `<uuid>.settings.json`; only the transcript carries
+            // the session_start record.
+            if !name.ends_with(".jsonl") {
+                continue;
+            }
+            let Ok(meta) = entry.metadata() else { continue };
+            let t = mtime_ms(&meta);
+            if t < at.saturating_sub(1000) {
+                continue;
+            }
+            let Some(head) = first_nonempty_line(&entry.path()) else {
+                continue;
+            };
+            let Ok(obj) = serde_json::from_str::<serde_json::Value>(&head) else {
+                continue;
+            };
+            if obj.get("type").and_then(|v| v.as_str()) == Some("session_start") {
+                if let Some(id) = obj.get("id").and_then(|v| v.as_str()) {
+                    let cwd = obj
+                        .get("cwd")
+                        .and_then(|v| v.as_str())
+                        .map(str::to_string);
+                    out.push(Candidate {
+                        id: id.to_string(),
+                        cwd,
+                        t,
+                    });
+                }
+            }
+        }
+    }
+    out
+}
+
 fn read_dirs(path: &Path) -> Vec<PathBuf> {
     let Ok(entries) = fs::read_dir(path) else {
         return Vec::new();
@@ -164,6 +212,7 @@ fn read_dirs(path: &Path) -> Vec<PathBuf> {
 pub enum Tool {
     Codex,
     Opencode,
+    Droid,
 }
 
 /// Poll the tool's store until a record whose cwd matches appears, or the PTY
@@ -177,6 +226,7 @@ pub fn watch(
     let candidates = match tool {
         Tool::Codex => codex_candidates,
         Tool::Opencode => opencode_candidates,
+        Tool::Droid => droid_candidates,
     };
     while is_alive() && now_ms().saturating_sub(spawned_at) < MAX_WATCH_MS {
         let mut matches: Vec<Candidate> = candidates(spawned_at)

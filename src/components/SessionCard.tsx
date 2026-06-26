@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '@/state/store'
 import type { Session, SessionStatus } from '@shared/types'
-import { AGENTS } from '@shared/agents'
 import { PLACEHOLDER_TITLE } from '@/lib/constants'
 import { Icon } from './Icon'
 import { Card } from './ui/Card'
@@ -41,8 +40,8 @@ export function SessionCard({ session }: { session: Session }) {
 
   return (
     <Card variant="matte" selected={isActive} onClick={() => selectSession(session.id)}>
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[7px] border-[0.5px] border-line bg-orange/10 text-body text-orange">
-        <AgentIcon agent={session.agent} />
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border-[0.5px] border-line bg-orange/10 text-cream">
+        <AgentIcon agent={session.agent} size={22} />
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         {editing ? (
@@ -70,16 +69,10 @@ export function SessionCard({ session }: { session: Session }) {
         )}
         <div className="flex items-center gap-2">
           <span
-            className="stencil inline-flex items-center gap-1.5 rounded-full px-[9px] py-[2px] text-body-xs uppercase"
+            className={`stencil py-[2px] text-[9px] uppercase tracking-[0.08em]${meta.pulse ? ' animate-led-pulse' : ''}`}
             style={{ color: meta.color }}
           >
-            <span
-              className={`inline-block h-[7px] w-[7px] rounded-full shadow-[0_0_8px_currentColor]${meta.pulse ? ' animate-led-pulse' : ''}`}
-            />
             {meta.label}
-          </span>
-          <span className="rounded-full border-[0.5px] border-line px-2 py-px font-stencil text-body-xs uppercase tracking-[0.08em] text-cream-ghost">
-            {AGENTS[session.agent].label}
           </span>
         </div>
       </div>

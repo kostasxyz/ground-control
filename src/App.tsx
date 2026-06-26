@@ -9,8 +9,11 @@ import { ArchiveSessionConfirm } from '@/components/ArchiveSessionConfirm'
 import { flushTerminalAppearance, setTerminalApplyDeferred } from '@/terminal/registry'
 import { setupZoom } from '@/lib/zoom'
 
-const WorkspaceShell = lazy(() =>
-  import('@/components/WorkspaceShell').then((module) => ({ default: module.WorkspaceShell }))
+const IconRail = lazy(() =>
+  import('@/components/IconRail').then((module) => ({ default: module.IconRail }))
+)
+const ContentSplit = lazy(() =>
+  import('@/components/ContentSplit').then((module) => ({ default: module.ContentSplit }))
 )
 const TerminalDock = lazy(() =>
   import('@/components/TerminalDock').then((module) => ({ default: module.TerminalDock }))
@@ -60,18 +63,30 @@ export default function App() {
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-linear-to-b/srgb from-surface-2 to-surface">
         <div className="grain" />
         <Titlebar />
-        {/* data-app-body: measurement hook for the dock-height drag (TerminalDock) */}
-        <div className="flex min-h-0 flex-1" data-app-body>
+        {/* The rail spans the full height between titlebar and status bar; the
+            body + terminal dock stack in a column to its right so the dock never
+            extends under the rail's column. */}
+        <div className="flex min-h-0 flex-1">
           <Suspense fallback={null}>
-            {workspaceLoaded && <WorkspaceShell hidden={view !== 'workspace' ? true : undefined} />}
-            {view === 'settings' && <SettingsPage />}
-            {view === 'gitDiff' && <GitDiffViewer />}
+            {workspaceLoaded && <IconRail hidden={view !== 'workspace' ? true : undefined} />}
+            {/* relative: positioning context for the terminal-dock overlay.
+                pb-10 (workspace only) reserves the collapsed bar's height so the
+                body never sits under it; the dock then slides up *over* the body. */}
+            <div
+              className={`relative flex min-h-0 flex-1 flex-col${
+                view === 'workspace' ? ' pb-10' : ''
+              }`}
+            >
+              <div className="flex min-h-0 flex-1" data-app-body>
+                {workspaceLoaded && <ContentSplit hidden={view !== 'workspace' ? true : undefined} />}
+                {view === 'settings' && <SettingsPage />}
+                {view === 'gitDiff' && <GitDiffViewer />}
+                {view === 'welcome' && <WelcomePage />}
+              </div>
+              {workspaceLoaded && <TerminalDock hidden={view !== 'workspace' ? true : undefined} />}
+            </div>
           </Suspense>
-          {view === 'welcome' && <WelcomePage />}
         </div>
-        <Suspense fallback={null}>
-          {workspaceLoaded && <TerminalDock hidden={view !== 'workspace' ? true : undefined} />}
-        </Suspense>
         <StatusBar />
         <ArchiveSessionConfirm />
       </div>

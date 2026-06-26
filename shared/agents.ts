@@ -3,7 +3,7 @@
 // acquired; the *behavioral* adapters live in electron/main/agents.ts. This file
 // owns only what both sides need: the id/label/bin and the id strategy.
 
-export type AgentId = 'claude' | 'pi' | 'codex' | 'opencode' | 'cursor'
+export type AgentId = 'claude' | 'pi' | 'codex' | 'opencode' | 'cursor' | 'droid'
 
 // How a session's resumable id comes to exist:
 //  - assign   : we mint it and pass it on first launch        (claude --session-id)
@@ -24,11 +24,14 @@ export const AGENTS: Record<AgentId, AgentMeta> = {
   pi: { id: 'pi', label: 'Pi', bin: 'pi', idStrategy: 'assign' },
   codex: { id: 'codex', label: 'Codex', bin: 'codex', idStrategy: 'discover' },
   opencode: { id: 'opencode', label: 'OpenCode', bin: 'opencode', idStrategy: 'discover' },
-  cursor: { id: 'cursor', label: 'Cursor', bin: 'cursor-agent', idStrategy: 'precreate' }
+  cursor: { id: 'cursor', label: 'Cursor', bin: 'cursor-agent', idStrategy: 'precreate' },
+  // droid (Factory) mints its id on first message into ~/.factory/sessions/<slug>/
+  // <uuid>.jsonl; we read it back off disk and resume with `droid --resume <id>`.
+  droid: { id: 'droid', label: 'Droid', bin: 'droid', idStrategy: 'discover' }
 }
 
 /** Dialog order — Claude (the default) first, then Pi, then the rest. */
-export const AGENT_ORDER: AgentId[] = ['claude', 'pi', 'codex', 'opencode', 'cursor']
+export const AGENT_ORDER: AgentId[] = ['claude', 'pi', 'codex', 'opencode', 'cursor', 'droid']
 
 export function isAgentId(x: unknown): x is AgentId {
   return typeof x === 'string' && x in AGENTS

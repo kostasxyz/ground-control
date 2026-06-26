@@ -25,10 +25,11 @@ export const DEFAULT_TERMINAL_BACKGROUND_OPACITY = 33
 export const DEFAULT_WORKTREE_DIRECTORY = '~/.groundcontrol/worktrees'
 export const DEFAULT_GIT_DIFF_FILE_LIST_WIDTH = 260
 
-/** Project-terminals panel height bounds (% of the content area, P007 ADR-004). */
+/** Project-terminals panel height bounds (% of the content column, P007 ADR-004).
+ *  The panel overlays the body, so the max can climb near full height. */
 export const TERMINAL_PANEL_DEFAULT_PCT = 30
 export const TERMINAL_PANEL_MIN_PCT = 15
-export const TERMINAL_PANEL_MAX_PCT = 70
+export const TERMINAL_PANEL_MAX_PCT = 95
 
 /** Clamp a panel height % to its bounds (0.1 precision so drags stay smooth). */
 export function clampTerminalPanelPct(v: number): number {

@@ -77,7 +77,7 @@ export function ConsolePane() {
           </IconButton>
           <IconButton
             className="h-6 w-6 border-0 bg-transparent hover:bg-transparent"
-            tooltip={terminalPanelOpen ? 'Hide terminals' : 'Project terminals'}
+            tooltip={terminalPanelOpen ? 'Hide terminals' : 'Terminals'}
             disabled={!activeProjectId}
             onClick={toggleProjectTerminals}
           >

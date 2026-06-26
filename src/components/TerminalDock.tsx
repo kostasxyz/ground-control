@@ -33,6 +33,7 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
   const focusedShellTerminalId = useStore((s) => s.focusedShellTerminalId)
   const shellExited = useStore((s) => s.shellExited)
   const activatedWorktrees = useStore((s) => s.activatedWorktrees)
+  const dockRef = useRef<HTMLDivElement | null>(null)
   const dragStartRef = useRef({ startPx: 0, area: 0 })
 
   const activeProject = useMemo(
@@ -45,20 +46,15 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
       activeProject ? visibleTerminals(shellTerminals, activeProject.id, worktreeKey) : [],
     [shellTerminals, activeProject, worktreeKey]
   )
-  // panel/(panel+body) = pct/100 with body at flex "1 1 0" ⇒ grow = pct/(100-pct).
-  const grow = clampTerminalPanelPct(pct) / (100 - clampTerminalPanelPct(pct))
-
   const { onPointerDown, dragging } = useResizeHandle({
     orientation: 'horizontal',
     onDragStart: () => {
-      // Fresh measurement at drag start: the squeezable area (body + panel) is
-      // invariant while the divider moves, so one read anchors the whole drag.
-      const body = document.querySelector<HTMLElement>('[data-app-body]')
-      const panel = document.querySelector<HTMLElement>('[data-term-dock-panel]')
-      if (!body || !panel) return false
-      const area = body.clientHeight + panel.clientHeight
-      if (!area) return false
-      dragStartRef.current = { startPx: panel.clientHeight, area }
+      // The dock overlays the body, so its height is a % of the whole content
+      // column (its positioned parent). One read at drag start anchors the move.
+      const dock = dockRef.current
+      const column = dock?.parentElement
+      if (!dock || !column?.clientHeight) return false
+      dragStartRef.current = { startPx: dock.clientHeight, area: column.clientHeight }
     },
     onMove: (delta) => {
       // Dragging up grows the panel (the divider is its top edge). The hook's
@@ -71,16 +67,20 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
 
   return (
     <div
-      // The slide: the panel's share is a flex-grow ratio, which animates.
-      className={`flex min-h-0 flex-col bg-statusbar ${
-        dragging ? 'transition-none' : 'transition-[flex-grow] ease-[ease]'
+      ref={dockRef}
+      // Overlay: absolutely pinned to the bottom of the content column so opening
+      // slides the panel *over* the body instead of squeezing it. The height (a %
+      // of the column) animates the slide; bg is opaque so the body never shows
+      // through.
+      className={`absolute inset-x-0 bottom-0 z-10 flex min-h-0 flex-col bg-surface ${
+        dragging ? 'transition-none' : 'transition-[height] ease-[ease]'
       }`}
       style={
         {
           display: hidden ? 'none' : undefined,
           transitionDuration: `${TERMINAL_PANEL_ANIM_MS}ms`,
-          // Closed: exactly the bar. Open: bar + divider as basis, panel from grow.
-          flex: open ? `${grow} 0 41px` : '0 0 40px'
+          // Closed: just the bar. Open: a share of the column, overlaying the body.
+          height: open ? `${clampTerminalPanelPct(pct)}%` : '40px'
         } as CSSProperties
       }
     >
@@ -95,7 +95,7 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
       <div className="flex h-10 shrink-0 items-center gap-2 border-t border-line px-3">
         <div className="flex shrink-0 items-center gap-2 font-display text-body-2xs font-bold uppercase tracking-[0.08em] text-cream-dim">
           <Icon name="terminal" size={14} className="text-orange" />
-          <span>Project Terminals</span>
+          <span>Terminals</span>
         </div>
         <div className="flex min-w-0 items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {projectTerminals.map((t) => (

@@ -198,6 +198,7 @@ impl PtyManager {
             let tool = match plan.watch {
                 IdWatch::Codex => Some(Tool::Codex),
                 IdWatch::Opencode => Some(Tool::Opencode),
+                IdWatch::Droid => Some(Tool::Droid),
                 IdWatch::None => None,
             };
             if let Some(tool) = tool {
