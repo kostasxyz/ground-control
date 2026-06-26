@@ -76,6 +76,11 @@ export interface XtermOptions {
   /** Bytes written on Shift+Enter to insert a newline. Defaults to ESC+CR;
    *  agents that read a different sequence (pi) override it. */
   newlineSeq?: string
+  /** Bytes written on ⌘V (macOS) when the clipboard holds an image, so the
+   *  mac-native paste shortcut also pastes screenshots. The agent reads the OS
+   *  clipboard itself on receipt (Claude/pi use ^V = \x16). Unset → ⌘V stays
+   *  text-only (shells, and agents without clipboard image paste). */
+  imagePasteSeq?: string
 }
 
 export interface XtermHandles {
@@ -194,8 +199,26 @@ export function useXterm(opts: XtermOptions): XtermHandles {
         if (key === 'v') {
           // macOS ⌘V is the browser's native paste binding: return false to stop
           // xterm re-emitting the key and let the native paste event flow into
-          // xterm's own handler (bracketed paste). Don't preventDefault.
-          if (isMac) return false
+          // xterm's own handler (bracketed paste) for TEXT. Don't preventDefault.
+          if (isMac) {
+            // ⌘V also pastes images. The native text paste is a no-op for an
+            // image-only clipboard (no text/plain), so when the clipboard holds
+            // an image and this agent can paste one, forward its image-paste
+            // sequence — the agent reads the OS clipboard itself. Async, so it
+            // runs after the synchronous return; clipboard.read() unavailable or
+            // denied just falls back to the agent's own Ctrl+V.
+            const imageSeq = cbRef.current.imagePasteSeq
+            if (imageSeq && navigator.clipboard?.read) {
+              void navigator.clipboard
+                .read()
+                .then((items) => {
+                  if (items.some((it) => it.types.some((t) => t.startsWith('image/'))))
+                    io.write(id, imageSeq)
+                })
+                .catch(() => {})
+            }
+            return false
+          }
           // Ctrl+Shift+V is NOT a native paste binding, so read the clipboard
           // ourselves and feed xterm's bracketed paste. preventDefault guards
           // against any native paste also firing (no double paste).

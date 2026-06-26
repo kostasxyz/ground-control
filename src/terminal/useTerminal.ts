@@ -15,6 +15,16 @@ const AGENT_NEWLINE: Partial<Record<AgentId, string>> = {
   pi: '\x1b[13;2u'
 }
 
+// Per-agent sequence that makes the agent paste an image straight from the OS
+// clipboard. These agents already read the system clipboard when they receive
+// Ctrl+V (^V = \x16); forwarding it on ⌘V (useXterm) lets the mac-native shortcut
+// paste screenshots too. Agents not listed keep ⌘V text-only — their own Ctrl+V,
+// which passes through untouched, still works if they support image paste.
+const AGENT_IMAGE_PASTE: Partial<Record<AgentId, string>> = {
+  claude: '\x16',
+  pi: '\x16'
+}
+
 const sessionIo: XtermIo = {
   write: (id, data) => window.gc.session.write(id, data),
   resize: (id, cols, rows) => window.gc.session.resize(id, cols, rows),
@@ -57,6 +67,7 @@ export function useTerminal(opts: TerminalOptions) {
     io: sessionIo,
     active: opts.active,
     newlineSeq: AGENT_NEWLINE[opts.agent],
+    imagePasteSeq: AGENT_IMAGE_PASTE[opts.agent],
 
     setup: () => {
       aliveRef.current = true
