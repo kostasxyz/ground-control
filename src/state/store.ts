@@ -16,12 +16,11 @@ import { AGENTS } from '@shared/agents'
 import { uuid } from '@/lib/id'
 import { appearanceChanged, applyAppearance } from '@/lib/applyAppearance'
 import {
-  agentFallbackTitle,
   MAX_LIVE_SESSIONS,
   MAX_SHELL_TERMINALS,
-  PLACEHOLDER_TITLE,
   PROJECT_COLORS,
-  SESSIONS_PANE_DEFAULT
+  SESSIONS_PANE_DEFAULT,
+  sessionTimestampTitle
 } from '@/lib/constants'
 import {
   addActivatedWorktree,
@@ -175,7 +174,6 @@ interface Store {
   setError(id: string, message: string): void
   setAgentSessionId(id: string, agentSessionId: string): void
   renameSession(id: string, title: string): void
-  refreshTitle(id: string): Promise<void>
 }
 
 // --- persistence (debounced) -------------------------------------------------
@@ -1037,9 +1035,8 @@ export const useStore = create<Store>((set, get) => ({
       // create-chat. codex/opencode: backfilled once they persist a record on
       // the first message.
       agentSessionId: AGENTS[agent].idStrategy === 'assign' ? uuid() : null,
-      // claude keeps the placeholder so its transcript title fills in; others get
-      // a stable fallback (non-placeholder ⇒ never auto-derived).
-      title: agent === 'claude' ? PLACEHOLDER_TITLE : agentFallbackTitle(agent, project.name),
+      // Default name: creation timestamp (YYYY-MM-DD-HHMMSS); stays until rename.
+      title: sessionTimestampTitle(now),
       cwd: worktreeKey,
       status: 'pending',
       started: false,
@@ -1219,26 +1216,6 @@ export const useStore = create<Store>((set, get) => ({
       sessions: s.sessions.map((se) =>
         se.id === id ? { ...se, title: trimmed, renamed: true } : se
       )
-    }))
-    persist(get)
-  },
-
-  async refreshTitle(id) {
-    const session = get().sessions.find((s) => s.id === id)
-    // Only Claude derives titles from its transcript; a manual rename or a
-    // non-placeholder fallback title is left untouched (PLAN 003 §4.4).
-    if (
-      !session ||
-      session.agent !== 'claude' ||
-      session.renamed ||
-      session.title !== PLACEHOLDER_TITLE ||
-      !session.agentSessionId
-    )
-      return
-    const title = await window.gc.transcript.deriveTitle(session.agentSessionId)
-    if (!title) return
-    set((s) => ({
-      sessions: s.sessions.map((se) => (se.id === id ? { ...se, title } : se))
     }))
     persist(get)
   }

@@ -1,7 +1,5 @@
-import { useEffect } from 'react'
 import type { Session } from '@shared/types'
 import { useStore } from '@/state/store'
-import { PLACEHOLDER_TITLE } from '@/lib/constants'
 import { useTerminal } from './useTerminal'
 
 interface Props {
@@ -19,7 +17,6 @@ export function TerminalView({ session, active }: Props) {
   const markRunning = useStore((s) => s.markRunning)
   const markExited = useStore((s) => s.markExited)
   const setError = useStore((s) => s.setError)
-  const refreshTitle = useStore((s) => s.refreshTitle)
 
   const ref = useTerminal({
     id: session.id,
@@ -33,20 +30,6 @@ export function TerminalView({ session, active }: Props) {
     onExit: () => markExited(session.id),
     onError: (message) => setError(session.id, message)
   })
-
-  // Until the transcript reveals the first prompt, poll for a real title.
-  const title = session.title
-  const sessionId = session.id
-  useEffect(() => {
-    if (title !== PLACEHOLDER_TITLE) return
-    let tries = 0
-    const iv = setInterval(() => {
-      tries += 1
-      void refreshTitle(sessionId)
-      if (tries >= 8) clearInterval(iv)
-    }, 3000)
-    return () => clearInterval(iv)
-  }, [title, sessionId, refreshTitle])
 
   // OpenCode paints its own opaque, edge-to-edge background. Two things would
   // otherwise leak the chrome image around it: (1) the usual inner padding, and

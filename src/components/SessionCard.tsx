@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '@/state/store'
 import type { Session, SessionStatus } from '@shared/types'
-import { PLACEHOLDER_TITLE } from '@/lib/constants'
 import { Icon } from './Icon'
 import { Card } from './ui/Card'
 import { IconButton } from './ui/IconButton'
@@ -26,7 +25,6 @@ export function SessionCard({ session }: { session: Session }) {
 
   const isActive = session.id === activeSessionId
   const meta = STATUS[session.status]
-  const isPlaceholder = session.title === PLACEHOLDER_TITLE
 
   const beginEdit = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -60,7 +58,7 @@ export function SessionCard({ session }: { session: Session }) {
           />
         ) : (
           <div
-            className={`truncate text-body font-semibold${isPlaceholder ? ' italic glow-orange' : ''}`}
+            className="truncate text-body font-semibold"
             title="Double-click to rename"
             onDoubleClick={beginEdit}
           >

@@ -1,15 +1,13 @@
-import { AGENTS, type AgentId } from '@shared/agents'
-
-/** Title shown before Claude's transcript reveals the first prompt (PLAN §6, §8). */
-export const PLACEHOLDER_TITLE = 'Waiting for initial prompt…'
-
 /**
- * Initial title for a non-Claude session (PLAN 003 §4.4). Claude keeps the
- * placeholder so its transcript-derived title fills in; the others get a stable
- * fallback the user can rename. Non-placeholder ⇒ never auto-derived.
+ * Default session title: the creation time as `YYYY-MM-DD-HHMMSS` (local time).
+ * Every new session (any agent) gets this and keeps it until the user renames.
  */
-export function agentFallbackTitle(agent: AgentId, projectName: string): string {
-  return `${AGENTS[agent].label} · ${projectName}`
+export function sessionTimestampTitle(now: number = Date.now()): string {
+  const d = new Date(now)
+  const pad = (n: number): string => String(n).padStart(2, '0')
+  const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+  const time = `${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`
+  return `${date}-${time}`
 }
 
 /**
