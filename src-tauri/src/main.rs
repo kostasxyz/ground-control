@@ -7,6 +7,7 @@ mod diffparse;
 mod env;
 mod git;
 mod model;
+mod openers;
 mod paths;
 mod pty;
 mod store;
@@ -43,6 +44,7 @@ fn percent_decode(s: &str) -> String {
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .manage(PtyManager::new())
         // Managed terminal background images over groundcontrol://terminal-bg/<file>.
         .register_uri_scheme_protocol("groundcontrol", |ctx, request| {
@@ -105,6 +107,9 @@ fn main() {
             git::git_worktree_remove,
             git::git_diff_files,
             git::git_file_diff,
+            openers::dir_openers,
+            openers::open_dir_in_app,
+            openers::reveal_dir,
             system::system_agents,
             system::system_home_dir,
         ])

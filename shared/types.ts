@@ -253,6 +253,12 @@ export interface GitFileDiff {
   error?: string
 }
 
+/** An installed editor/IDE that can open a directory. */
+export interface DirOpener {
+  id: string
+  label: string
+}
+
 // The typed bridge the preload exposes on `window.gc`.
 export interface GroundControlApi {
   session: {
@@ -324,6 +330,15 @@ export interface GroundControlApi {
       path: string,
       oldPath?: string
     ): Promise<GitFileDiff>
+  }
+  /** External directory openers (editors / OS file browser). */
+  dir: {
+    /** Installed editors that can open a directory (macOS-detected; `[]` elsewhere). */
+    openers(): Promise<DirOpener[]>
+    /** Reveal a directory in the OS file browser (Finder / Explorer / …). */
+    reveal(dir: string): Promise<void>
+    /** Open a directory in a detected editor/IDE by opener id. */
+    openInApp(dir: string, openerId: string): Promise<void>
   }
   system: {
     /** Probe every known agent CLI (presence + version). */

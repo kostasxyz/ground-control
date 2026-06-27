@@ -6,6 +6,7 @@ import { ProjectDropdown } from './ProjectDropdown'
 import { GitControls } from './GitControls'
 import { GitChangesBadge } from './GitChangesBadge'
 import { CommitDropdown } from './CommitDropdown'
+import { OpenDirDropdown } from './OpenDirDropdown'
 
 /**
  * ------------------------------------------------
@@ -48,6 +49,7 @@ export function Titlebar() {
               <IconButton title="Project settings" aria-label="Project settings" disabled>
                 <Icon name="gear" />
               </IconButton>
+              <OpenDirDropdown dir={project.activeWorktreePath ?? project.path} />
               <GitControls project={project} />
               <GitChangesBadge />
               <CommitDropdown />

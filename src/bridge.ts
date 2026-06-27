@@ -5,6 +5,7 @@ import type {
   AgentId,
   AgentInfo,
   DiffSource,
+  DirOpener,
   GitDiffFileList,
   GitFileDiff,
   GitMutationResult,
@@ -167,6 +168,12 @@ const api: GroundControlApi = {
       invoke<GitDiffFileList>('git_diff_files', { worktreePath, source }),
     fileDiff: (worktreePath: string, source: DiffSource, path: string, oldPath?: string) =>
       invoke<GitFileDiff>('git_file_diff', { worktreePath, source, path, oldPath })
+  },
+  dir: {
+    openers: () => invoke<DirOpener[]>('dir_openers'),
+    reveal: (dir: string) => invoke<void>('reveal_dir', { dir }),
+    openInApp: (dir: string, openerId: string) =>
+      invoke<void>('open_dir_in_app', { dir, openerId })
   },
   system: {
     agents: () => invoke<Record<AgentId, AgentInfo>>('system_agents'),
