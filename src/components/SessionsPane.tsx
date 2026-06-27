@@ -54,7 +54,7 @@ export function SessionsPane() {
     <div className={paneClass}>
       <NewSessionDialog />
 
-      <div className="flex shrink-0 items-center justify-between gap-3 px-4 py-3">
+      <div className="flex h-8 shrink-0 items-center justify-between gap-3 px-4">
         <h2 className="min-w-0 truncate font-display text-heading-sm font-bold text-orange">
           {project.name}
         </h2>
@@ -70,7 +70,7 @@ export function SessionsPane() {
         </Button>
       </div>
 
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-2 pt-2 pb-4 pl-4">
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-2 pt-5 pb-4 pl-4">
         {noAgents && (
           <div className="rounded-lg border-[0.5px] border-ember/40 bg-ember/8 px-[11px] py-2 text-body-sm leading-normal text-ember">
             No agent CLIs were found on your PATH. Install one of{' '}
