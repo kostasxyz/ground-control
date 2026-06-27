@@ -8,11 +8,13 @@ const ALT_SCREEN = '\x1b[?1049h'
 const REVEAL_FALLBACK_MS = 2500
 
 // Per-agent override for the Shift+Enter newline byte sequence (default is
-// ESC+CR, in useXterm). pi's only newline binding is Shift+Enter, which it reads
-// as the kitty-protocol CSI sequence `\x1b[13;2u` (enter=13, shift=2) — parsed
-// regardless of whether the terminal negotiated the kitty keyboard protocol.
+// ESC+CR, in useXterm). pi and droid read Shift+Enter as the kitty/CSI-u
+// sequence `\x1b[13;2u` (enter=13, shift=2) — droid also accepts its Ghostty
+// variant — and neither treats ESC+CR (Alt+Enter) as a newline, hence the
+// override. claude/codex/opencode/cursor accept ESC+CR, so they keep the default.
 const AGENT_NEWLINE: Partial<Record<AgentId, string>> = {
-  pi: '\x1b[13;2u'
+  pi: '\x1b[13;2u',
+  droid: '\x1b[13;2u'
 }
 
 // Per-agent sequence that makes the agent paste an image straight from the OS

@@ -11,7 +11,7 @@ import { registerTerminal, unregisterTerminal } from './registry'
 // Shift+Enter inserts a newline instead of submitting. ESC+CR is the
 // "Alt/Option+Enter" sequence most agent CLIs (Claude, Codex, …) treat as
 // "insert newline"; harmless in a plain shell. The default unless a terminal
-// overrides it via `newlineSeq` (pi reads the kitty Shift+Enter CSI — useTerminal).
+// overrides it via `newlineSeq` (pi and droid read the kitty Shift+Enter CSI — useTerminal).
 const DEFAULT_NEWLINE = '\x1b\r'
 const LAYOUT_SETTLE_BUFFER_MS = 40
 const LAYOUT_SETTLE_MS = TERMINAL_PANEL_ANIM_MS + LAYOUT_SETTLE_BUFFER_MS
@@ -74,7 +74,7 @@ export interface XtermOptions {
   /** Hook xterm setup before the PTY exists (key handlers etc.). */
   setup?: (term: Terminal) => void
   /** Bytes written on Shift+Enter to insert a newline. Defaults to ESC+CR;
-   *  agents that read a different sequence (pi) override it. */
+   *  agents that read a different sequence (pi, droid) override it. */
   newlineSeq?: string
   /** Bytes written on ⌘V (macOS) when the clipboard holds an image, so the
    *  mac-native paste shortcut also pastes screenshots. The agent reads the OS
@@ -166,8 +166,8 @@ export function useXterm(opts: XtermOptions): XtermHandles {
 
       // Shift+Enter → insert a newline instead of submitting. Byte sequence is
       // per-terminal: ESC+CR by default (what Claude/Codex/… read as "newline"),
-      // or `newlineSeq` for agents with their own (pi → the kitty Shift+Enter
-      // CSI). preventDefault so the off-screen helper textarea doesn't also keep
+      // or `newlineSeq` for agents with their own (pi, droid → the kitty
+      // Shift+Enter CSI). preventDefault so the off-screen helper textarea doesn't also keep
       // a stray newline.
       if (e.key === 'Enter' && e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey) {
         e.preventDefault()
