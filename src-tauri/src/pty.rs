@@ -3,15 +3,14 @@ use std::io::{Read, Write};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
-use std::time::{Duration, SystemTime, UNIX_EPOCH};
+use std::time::Duration;
 
 use portable_pty::{native_pty_system, ChildKiller, CommandBuilder, MasterPty, PtySize};
 use tauri::{AppHandle, Emitter, Manager, State};
 
-use crate::agents::{agent_bin, plan_spawn, IdWatch};
-use crate::discover::{self, Tool};
+use crate::agents::{agent_bin, plan_spawn};
 use crate::env::{capture_login_env, login_shell, resolve_bin, shell_quote};
-use crate::model::{DataEvent, ExitEvent, IdEvent, ShellSpawnOptions, SpawnOptions, SpawnResult};
+use crate::model::{DataEvent, ExitEvent, ShellSpawnOptions, SpawnOptions, SpawnResult};
 
 // Coalesce PTY output before crossing the IPC boundary (port of pty.ts §4).
 const FLUSH_MS: u64 = 6;
@@ -50,17 +49,10 @@ struct SessionHandle {
 pub struct PtyManager {
     sessions: Mutex<HashMap<String, SessionHandle>>,
     // Monotonic per-id spawn counter, bumped by every spawn and kill. Shared
-    // with the reader/flusher/discover threads so a superseded PTY stops
-    // emitting instead of clobbering whatever now owns the id.
+    // with the reader/flusher threads so a superseded PTY stops emitting
+    // instead of clobbering whatever now owns the id.
     // When both locks are needed, take `gen` before `sessions`.
     gen: Arc<Mutex<HashMap<String, u64>>>,
-}
-
-fn now_ms() -> u128 {
-    SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .map(|d| d.as_millis())
-        .unwrap_or(0)
 }
 
 impl PtyManager {
@@ -155,12 +147,10 @@ impl PtyManager {
             return SpawnResult::err("superseded");
         }
 
-        let plan = plan_spawn(
-            &opts.agent,
-            &opts.mode,
-            opts.agent_session_id.as_deref(),
-            &bin_path,
-        );
+        let plan = match plan_spawn(&opts.agent, &opts.mode, opts.agent_session_id.as_deref()) {
+            Ok(plan) => plan,
+            Err(error) => return SpawnResult::err(error),
+        };
         if self.current_gen(&opts.id) != my_gen {
             return SpawnResult::err("superseded");
         }
@@ -177,7 +167,7 @@ impl PtyManager {
             .trim_end()
             .to_string();
 
-        let res = self.launch(
+        self.launch(
             app,
             Kind::Session,
             &opts.id,
@@ -188,24 +178,7 @@ impl PtyManager {
             &["-lc", &command],
             &env,
             my_gen,
-        );
-        if res.ok {
-            // precreate (cursor): id known now → persist immediately.
-            if let Some(id) = plan.emit_id {
-                self.emit_id(app, &opts.id, &id, my_gen);
-            }
-            // discover (codex/opencode): watch only while this PTY stays live.
-            let tool = match plan.watch {
-                IdWatch::Codex => Some(Tool::Codex),
-                IdWatch::Opencode => Some(Tool::Opencode),
-                IdWatch::Droid => Some(Tool::Droid),
-                IdWatch::None => None,
-            };
-            if let Some(tool) = tool {
-                self.spawn_discover(app, &opts.id, &opts.cwd, my_gen, tool);
-            }
-        }
-        res
+        )
     }
 
     pub fn spawn_shell(&self, app: &AppHandle, opts: ShellSpawnOptions) -> SpawnResult {
@@ -412,41 +385,6 @@ impl PtyManager {
 
         SpawnResult::ok()
     }
-
-    fn emit_id(&self, app: &AppHandle, id: &str, agent_session_id: &str, my_gen: u64) {
-        if self.current_gen(id) != my_gen {
-            return;
-        }
-        let _ = app.emit(
-            "session-id",
-            IdEvent {
-                id: id.to_string(),
-                agent_session_id: agent_session_id.to_string(),
-            },
-        );
-    }
-
-    fn spawn_discover(&self, app: &AppHandle, id: &str, cwd: &str, my_gen: u64, tool: Tool) {
-        let app = app.clone();
-        let gen = self.gen.clone();
-        let id = id.to_string();
-        let cwd = cwd.to_string();
-        let spawned_at = now_ms();
-        thread::spawn(move || {
-            let is_alive = || gen.lock().unwrap().get(&id).copied().unwrap_or(0) == my_gen;
-            if let Some(sid) = discover::watch(tool, &cwd, spawned_at, &is_alive) {
-                if is_alive() {
-                    let _ = app.emit(
-                        "session-id",
-                        IdEvent {
-                            id: id.clone(),
-                            agent_session_id: sid,
-                        },
-                    );
-                }
-            }
-        });
-    }
 }
 
 impl Default for PtyManager {
@@ -466,7 +404,10 @@ pub async fn session_spawn(app: AppHandle, opts: SpawnOptions) -> SpawnResult {
 
 #[tauri::command]
 pub async fn terminal_spawn(app: AppHandle, opts: ShellSpawnOptions) -> SpawnResult {
-    eprintln!("[GC-DBG] terminal_spawn id={} {}x{}", opts.id, opts.cols, opts.rows);
+    eprintln!(
+        "[GC-DBG] terminal_spawn id={} {}x{}",
+        opts.id, opts.cols, opts.rows
+    );
     tauri::async_runtime::spawn_blocking(move || app.state::<PtyManager>().spawn_shell(&app, opts))
         .await
         .unwrap_or_else(|_| SpawnResult::err("spawn task failed"))

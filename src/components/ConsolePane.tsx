@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { AGENTS } from '@shared/agents'
 import { useStore } from '@/state/store'
 import { selectedWorktreeKey, visibleTerminals } from '@/state/worktreeScope'
 import { FONT_SIZE_BOUNDS } from '@shared/fonts'
@@ -51,6 +52,8 @@ export function ConsolePane() {
   }
   const activeIsLive = !!activeSessionId && liveIds.includes(activeSessionId)
   const activeError = activeSessionId ? errors[activeSessionId] : undefined
+  const activeCanResume =
+    !!active && AGENTS[active.agent].idStrategy !== 'fresh' && !!active.agentSessionId
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
@@ -128,12 +131,16 @@ export function ConsolePane() {
               {activeError
                 ? activeError
                 : active.status === 'exited'
-                  ? 'This session ended. Resume to reattach to the conversation.'
-                  : 'This session is parked. Resume to reattach to the conversation.'}
+                  ? activeCanResume
+                    ? 'This session ended. Resume to reattach to the conversation.'
+                    : 'This session ended. Start a new run to continue with this agent.'
+                  : activeCanResume
+                    ? 'This session is parked. Resume to reattach to the conversation.'
+                    : 'This session is parked. Start a new run to continue with this agent.'}
             </div>
             {!activeError && (
               <Button variant="primary" onClick={() => selectSession(active.id)}>
-                <span>⟳</span> Resume session
+                <span>⟳</span> {activeCanResume ? 'Resume session' : 'Start new run'}
               </Button>
             )}
           </div>

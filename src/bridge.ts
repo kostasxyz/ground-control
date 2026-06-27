@@ -15,7 +15,8 @@ import type {
   Platform,
   SessionDataEvent,
   SessionExitEvent,
-  SessionIdEvent,
+  SessionPrepareOptions,
+  SessionPrepareResult,
   Settings,
   ShellSpawnOptions,
   SpawnOptions,
@@ -88,13 +89,14 @@ function themeNeedsOsSeed(settings: Partial<Settings> & { theme?: unknown } | nu
 
 const api: GroundControlApi = {
   session: {
+    prepare: (opts: SessionPrepareOptions) =>
+      invoke<SessionPrepareResult>('agent_precreate_session', { opts }),
     spawn: (opts: SpawnOptions) => invoke<SpawnResult>('session_spawn', { opts }),
     write: (id, data) => void invoke('session_write', { id, data }),
     resize: (id, cols, rows) => void invoke('session_resize', { id, cols, rows }),
     kill: (id) => void invoke('session_kill', { id }),
     onData: (cb) => sub<SessionDataEvent>('session-data', cb),
-    onExit: (cb) => sub<SessionExitEvent>('session-exit', cb),
-    onId: (cb) => sub<SessionIdEvent>('session-id', cb)
+    onExit: (cb) => sub<SessionExitEvent>('session-exit', cb)
   },
   terminal: {
     spawn: (opts: ShellSpawnOptions) => invoke<SpawnResult>('terminal_spawn', { opts }),

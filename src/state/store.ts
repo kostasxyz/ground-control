@@ -101,6 +101,10 @@ interface Store {
   activeSessionId: string | null
   /** Whether the "new session" agent picker is open. */
   newSessionOpen: boolean
+  /** Agent currently allocating a precreated id from its CLI/API. */
+  newSessionPendingAgent: AgentId | null
+  /** Last new-session allocation error shown in the picker. */
+  newSessionError: string | null
   /** Session id pending archive confirmation, or null. Runtime-only. */
   sessionToArchive: string | null
   /** Sessions with a mounted terminal + live PTY (LRU order, front = newest). */
@@ -163,7 +167,7 @@ interface Store {
   selectProject(id: string): void
   openNewSession(): void
   closeNewSession(): void
-  newSession(agent: AgentId): void
+  newSession(agent: AgentId): Promise<void>
   selectSession(id: string): void
   requestArchiveSession(id: string): void
   cancelArchiveSession(): void
@@ -172,32 +176,41 @@ interface Store {
   markRunning(id: string): void
   markExited(id: string): void
   setError(id: string, message: string): void
-  setAgentSessionId(id: string, agentSessionId: string): void
   renameSession(id: string, title: string): void
 }
 
 // --- persistence (debounced) -------------------------------------------------
+function persistedState(s: Store): PersistedState {
+  return {
+    version: 3,
+    projects: s.projects,
+    // Runtime liveness is never persisted (PLAN §6): demote running → idle.
+    sessions: s.sessions.map((se) =>
+      se.status === 'running' || se.status === 'pending'
+        ? { ...se, status: 'idle' as SessionStatus }
+        : se
+    ),
+    activeProjectId: s.activeProjectId,
+    settings: s.settings,
+    shellTerminals: s.shellTerminals,
+    shellTerminalSeq: s.shellTerminalSeq
+  }
+}
+
 let saveTimer: ReturnType<typeof setTimeout> | null = null
 function persist(get: () => Store): void {
   if (saveTimer) clearTimeout(saveTimer)
   saveTimer = setTimeout(() => {
-    const s = get()
-    const state: PersistedState = {
-      version: 3,
-      projects: s.projects,
-      // Runtime liveness is never persisted (PLAN §6): demote running → idle.
-      sessions: s.sessions.map((se) =>
-        se.status === 'running' || se.status === 'pending'
-          ? { ...se, status: 'idle' as SessionStatus }
-          : se
-      ),
-      activeProjectId: s.activeProjectId,
-      settings: s.settings,
-      shellTerminals: s.shellTerminals,
-      shellTerminalSeq: s.shellTerminalSeq
-    }
-    void window.gc.store.save(state)
+    void window.gc.store.save(persistedState(get()))
   }, 250)
+}
+
+async function persistNow(get: () => Store): Promise<void> {
+  if (saveTimer) {
+    clearTimeout(saveTimer)
+    saveTimer = null
+  }
+  await window.gc.store.save(persistedState(get()))
 }
 
 /** Build a GitError for the error dialog from a failed mutation result. */
@@ -275,6 +288,8 @@ export const useStore = create<Store>((set, get) => ({
   activeSessionByWorktree: {},
   activeSessionId: null,
   newSessionOpen: false,
+  newSessionPendingAgent: null,
+  newSessionError: null,
   sessionToArchive: null,
   liveIds: [],
   terminalPanelOpen: false,
@@ -295,8 +310,6 @@ export const useStore = create<Store>((set, get) => ({
 
   async bootstrap() {
     registerOsSchemeListener()
-    // Discover/precreate agents learn their session id post-spawn; persist it.
-    window.gc.session.onId((e) => get().setAgentSessionId(e.id, e.agentSessionId))
     const [{ state: persisted, themeNeedsOsSeed }, agents, homeDir] = await Promise.all([
       window.gc.store.load(),
       window.gc.system.agents(),
@@ -1013,30 +1026,53 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   openNewSession() {
-    if (get().activeProjectId) set({ newSessionOpen: true })
+    if (get().activeProjectId) set({ newSessionOpen: true, newSessionError: null })
   },
 
   closeNewSession() {
-    set({ newSessionOpen: false })
+    if (get().newSessionPendingAgent) return
+    set({ newSessionOpen: false, newSessionError: null })
   },
 
-  newSession(agent) {
+  async newSession(agent) {
+    if (get().newSessionPendingAgent) return
     const { activeProjectId, projects } = get()
     if (!activeProjectId) return
     const project = projects.find((p) => p.id === activeProjectId)
     if (!project) return
     const worktreeKey = selectedWorktreeKey(project)
     const now = Date.now()
+    const title = sessionTimestampTitle(now)
+
+    set({ newSessionPendingAgent: agent, newSessionError: null })
+
+    let agentSessionId: string | null = null
+    try {
+      const strategy = AGENTS[agent].idStrategy
+      if (strategy === 'assign') {
+        agentSessionId = uuid()
+      } else if (strategy === 'precreate') {
+        const result = await window.gc.session.prepare({ agent, cwd: worktreeKey, title })
+        if (!result.ok || !result.agentSessionId) {
+          throw new Error(result.error || `Could not create a ${AGENTS[agent].label} session.`)
+        }
+        agentSessionId = result.agentSessionId
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      if (get().newSessionPendingAgent === agent) {
+        set({ newSessionPendingAgent: null, newSessionError: message })
+      }
+      return
+    }
+
     const session: Session = {
       id: uuid(),
       projectId: activeProjectId,
       agent,
-      // assign (claude, pi): we own the id now. cursor: backfilled post
-      // create-chat. codex/opencode: backfilled once they persist a record on
-      // the first message.
-      agentSessionId: AGENTS[agent].idStrategy === 'assign' ? uuid() : null,
+      agentSessionId,
       // Default name: creation timestamp (YYYY-MM-DD-HHMMSS); stays until rename.
-      title: sessionTimestampTitle(now),
+      title,
       cwd: worktreeKey,
       status: 'pending',
       started: false,
@@ -1055,10 +1091,16 @@ export const useStore = create<Store>((set, get) => ({
         session.id
       ),
       activeSessionId: session.id,
-      newSessionOpen: false
+      newSessionOpen: false,
+      newSessionPendingAgent: null,
+      newSessionError: null
     }))
+    try {
+      await persistNow(get)
+    } catch {
+      persist(get)
+    }
     set((s) => withLive(s, session.id)) // mount → spawns the chosen agent
-    persist(get)
   },
 
   selectSession(id) {
@@ -1193,15 +1235,6 @@ export const useStore = create<Store>((set, get) => ({
         se.id === id ? { ...se, status: 'exited' as SessionStatus } : se
       )
     }))
-  },
-
-  setAgentSessionId(id, agentSessionId) {
-    const session = get().sessions.find((s) => s.id === id)
-    if (!session || session.agentSessionId === agentSessionId) return
-    set((s) => ({
-      sessions: s.sessions.map((se) => (se.id === id ? { ...se, agentSessionId } : se))
-    }))
-    persist(get)
   },
 
   renameSession(id, title) {

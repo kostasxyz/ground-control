@@ -28,9 +28,8 @@ export interface Session {
   id: string // app-local id (also the PTY key)
   projectId: string
   agent: AgentId // which CLI this session runs
-  // The agent's own resumable session id. Known at birth for claude (we mint it)
-  // and cursor (create-chat); null for codex/opencode until their CLI persists a
-  // record on the first message, at which point we discover + backfill it.
+  // The agent's own resumable session id. Known before launch for assign and
+  // precreate agents; null for fresh-only agents that are always launched new.
   agentSessionId: string | null
   title: string
   /** Worktree/cwd captured when the session was created. */
@@ -129,12 +128,24 @@ export interface SpawnOptions {
   cols: number
   rows: number
   agent: AgentId
-  agentSessionId: string | null // null for discover agents on a fresh launch
+  agentSessionId: string | null // null for fresh-only agents
   mode: SpawnMode
 }
 
 export interface SpawnResult {
   ok: boolean
+  error?: string
+}
+
+export interface SessionPrepareOptions {
+  agent: AgentId
+  cwd: string
+  title: string
+}
+
+export interface SessionPrepareResult {
+  ok: boolean
+  agentSessionId?: string | null
   error?: string
 }
 
@@ -147,12 +158,6 @@ export interface SessionExitEvent {
   id: string
   exitCode: number
   signal?: number
-}
-
-// main → renderer once a discover/precreate agent's id becomes known post-spawn.
-export interface SessionIdEvent {
-  id: string // app session id
-  agentSessionId: string
 }
 
 export interface AgentInfo {
@@ -251,6 +256,7 @@ export interface GitFileDiff {
 // The typed bridge the preload exposes on `window.gc`.
 export interface GroundControlApi {
   session: {
+    prepare(opts: SessionPrepareOptions): Promise<SessionPrepareResult>
     spawn(opts: SpawnOptions): Promise<SpawnResult>
     write(id: string, data: string): void
     resize(id: string, cols: number, rows: number): void
@@ -259,8 +265,6 @@ export interface GroundControlApi {
     onData(cb: (e: SessionDataEvent) => void): () => void
     /** Subscribe to PTY exit. Returns an unsubscribe fn. */
     onExit(cb: (e: SessionExitEvent) => void): () => void
-    /** Subscribe to discovered/created agent session ids. Returns an unsubscribe fn. */
-    onId(cb: (e: SessionIdEvent) => void): () => void
   }
   /** Plain project shells (P007) — mirrors `session` minus agent concerns. */
   terminal: {

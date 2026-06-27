@@ -7,10 +7,9 @@ export type AgentId = 'claude' | 'pi' | 'codex' | 'opencode' | 'cursor' | 'droid
 
 // How a session's resumable id comes to exist:
 //  - assign   : we mint it and pass it on first launch        (claude --session-id)
-//  - precreate: a side command makes it before launch         (cursor create-chat)
-//  - discover : the CLI mints it on the first message; we read it back off disk
-//               (codex rollout, opencode storage)
-export type IdStrategy = 'assign' | 'precreate' | 'discover'
+//  - precreate: a side command/API makes it before launch     (cursor, codex)
+//  - fresh    : no official precreate/resume-by-id path; launch a new run
+export type IdStrategy = 'assign' | 'precreate' | 'fresh'
 
 export interface AgentMeta {
   id: AgentId
@@ -22,12 +21,10 @@ export interface AgentMeta {
 export const AGENTS: Record<AgentId, AgentMeta> = {
   claude: { id: 'claude', label: 'Claude', bin: 'claude', idStrategy: 'assign' },
   pi: { id: 'pi', label: 'Pi', bin: 'pi', idStrategy: 'assign' },
-  codex: { id: 'codex', label: 'Codex', bin: 'codex', idStrategy: 'discover' },
-  opencode: { id: 'opencode', label: 'OpenCode', bin: 'opencode', idStrategy: 'discover' },
+  codex: { id: 'codex', label: 'Codex', bin: 'codex', idStrategy: 'precreate' },
+  opencode: { id: 'opencode', label: 'OpenCode', bin: 'opencode', idStrategy: 'fresh' },
   cursor: { id: 'cursor', label: 'Cursor', bin: 'cursor-agent', idStrategy: 'precreate' },
-  // droid (Factory) mints its id on first message into ~/.factory/sessions/<slug>/
-  // <uuid>.jsonl; we read it back off disk and resume with `droid --resume <id>`.
-  droid: { id: 'droid', label: 'Droid', bin: 'droid', idStrategy: 'discover' }
+  droid: { id: 'droid', label: 'Droid', bin: 'droid', idStrategy: 'fresh' }
 }
 
 /** Dialog order — Claude (the default) first, then Pi, then the rest. */

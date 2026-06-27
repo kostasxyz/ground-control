@@ -4,7 +4,6 @@
 mod agents;
 mod dialog;
 mod diffparse;
-mod discover;
 mod env;
 mod git;
 mod model;
@@ -80,6 +79,7 @@ fn main() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            agents::agent_precreate_session,
             pty::session_spawn,
             pty::session_write,
             pty::session_resize,

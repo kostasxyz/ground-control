@@ -3,6 +3,7 @@
 
 export const IPC = {
   // renderer -> main (invoke / send)
+  sessionPrepare: 'session:prepare',
   sessionSpawn: 'session:spawn',
   sessionWrite: 'session:write',
   sessionResize: 'session:resize',
@@ -33,7 +34,6 @@ export const IPC = {
   // main -> renderer (webContents.send)
   sessionData: 'session:data',
   sessionExit: 'session:exit',
-  sessionId: 'session:id',
   terminalData: 'terminal:data',
   terminalExit: 'terminal:exit'
 } as const

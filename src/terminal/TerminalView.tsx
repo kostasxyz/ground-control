@@ -1,4 +1,5 @@
 import type { Session } from '@shared/types'
+import { AGENTS } from '@shared/agents'
 import { useStore } from '@/state/store'
 import { useTerminal } from './useTerminal'
 
@@ -17,13 +18,14 @@ export function TerminalView({ session, active }: Props) {
   const markRunning = useStore((s) => s.markRunning)
   const markExited = useStore((s) => s.markExited)
   const setError = useStore((s) => s.setError)
+  const canResume = AGENTS[session.agent].idStrategy !== 'fresh' && !!session.agentSessionId
 
   const ref = useTerminal({
     id: session.id,
     cwd: session.cwd,
     agent: session.agent,
-    agentSessionId: session.agentSessionId,
-    mode: session.started ? 'resume' : 'new',
+    agentSessionId: canResume ? session.agentSessionId : null,
+    mode: canResume && session.started ? 'resume' : 'new',
     active,
     onStarted: () => markStarted(session.id),
     onReveal: () => markRunning(session.id),

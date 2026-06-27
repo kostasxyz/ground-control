@@ -23,6 +23,14 @@ pub struct ShellSpawnOptions {
     pub rows: u16,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionPrepareOptions {
+    pub agent: String,
+    pub cwd: String,
+    pub title: String,
+}
+
 #[derive(Debug, Clone, Serialize)]
 pub struct SpawnResult {
     pub ok: bool,
@@ -45,7 +53,34 @@ impl SpawnResult {
     }
 }
 
-// Events main → renderer. Names: session-data / session-exit / session-id /
+#[derive(Debug, Clone, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SessionPrepareResult {
+    pub ok: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub agent_session_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<String>,
+}
+
+impl SessionPrepareResult {
+    pub fn ok(agent_session_id: Option<String>) -> Self {
+        Self {
+            ok: true,
+            agent_session_id,
+            error: None,
+        }
+    }
+    pub fn err(msg: impl Into<String>) -> Self {
+        Self {
+            ok: false,
+            agent_session_id: None,
+            error: Some(msg.into()),
+        }
+    }
+}
+
+// Events main → renderer. Names: session-data / session-exit /
 // terminal-data / terminal-exit (kebab; valid Tauri event identifiers).
 
 #[derive(Clone, Serialize)]
@@ -62,13 +97,6 @@ pub struct ExitEvent {
     pub exit_code: i32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub signal: Option<i32>,
-}
-
-#[derive(Clone, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct IdEvent {
-    pub id: String,
-    pub agent_session_id: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
