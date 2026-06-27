@@ -73,7 +73,12 @@ export default function App() {
                 Opening the dock grows it via flex-grow and squeezes the agent pane
                 (which resizes its height), instead of overlaying it. The panel can
                 be dragged up to (near) the top. */}
-            <div className="flex min-h-0 flex-1 flex-col">
+            {/* min-w-0: without it this column's min-width:auto resolves to its
+                content's min-content, which includes the dock's terminals
+                (n × min-w-300px). Past ~2 terminals that overflows the row and
+                widens the whole app — including the agent pane — instead of
+                letting the dock's group scroll internally. */}
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
               {/* overflow-hidden clips the body's content (sessions pane, its
                   scrollbar) to its own box so nothing bleeds over the terminal
                   dock below — the dock now sits beside the body as a flex sibling
