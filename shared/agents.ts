@@ -7,7 +7,7 @@ export type AgentId = 'claude' | 'pi' | 'codex' | 'opencode' | 'cursor' | 'droid
 
 // How a session's resumable id comes to exist:
 //  - assign   : we mint it and pass it on first launch        (claude --session-id)
-//  - precreate: a side command/API makes it before launch     (cursor, codex)
+//  - precreate: a side command/API makes it before launch     (cursor, codex, opencode)
 //  - fresh    : no official precreate/resume-by-id path; launch a new run
 export type IdStrategy = 'assign' | 'precreate' | 'fresh'
 
@@ -22,7 +22,7 @@ export const AGENTS: Record<AgentId, AgentMeta> = {
   claude: { id: 'claude', label: 'Claude', bin: 'claude', idStrategy: 'assign' },
   pi: { id: 'pi', label: 'Pi', bin: 'pi', idStrategy: 'assign' },
   codex: { id: 'codex', label: 'Codex', bin: 'codex', idStrategy: 'precreate' },
-  opencode: { id: 'opencode', label: 'OpenCode', bin: 'opencode', idStrategy: 'fresh' },
+  opencode: { id: 'opencode', label: 'OpenCode', bin: 'opencode', idStrategy: 'precreate' },
   cursor: { id: 'cursor', label: 'Cursor', bin: 'cursor-agent', idStrategy: 'precreate' },
   droid: { id: 'droid', label: 'Droid', bin: 'droid', idStrategy: 'fresh' }
 }
