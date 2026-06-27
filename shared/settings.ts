@@ -25,8 +25,9 @@ export const DEFAULT_TERMINAL_BACKGROUND_OPACITY = 33
 export const DEFAULT_WORKTREE_DIRECTORY = '~/.groundcontrol/worktrees'
 export const DEFAULT_GIT_DIFF_FILE_LIST_WIDTH = 260
 
-/** Project-terminals panel height bounds (% of the content column, P007 ADR-004).
- *  The panel overlays the body, so the max can climb near full height. */
+/** Project-terminals dock height bounds (% of the body+dock content area, P007 ADR-004).
+ *  The dock includes its divider, bar, and panel, so persisted values match
+ *  the total space it takes from the app body. */
 export const TERMINAL_PANEL_DEFAULT_PCT = 30
 export const TERMINAL_PANEL_MIN_PCT = 15
 export const TERMINAL_PANEL_MAX_PCT = 95

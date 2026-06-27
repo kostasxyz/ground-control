@@ -46,11 +46,15 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
       activeProject ? visibleTerminals(shellTerminals, activeProject.id, worktreeKey) : [],
     [shellTerminals, activeProject, worktreeKey]
   )
+  const panelPct = clampTerminalPanelPct(pct)
+  // dock/(dock+body) = pct/100 with both open dock and body at flex-basis 0.
+  const grow = panelPct / (100 - panelPct)
+
   const { onPointerDown, dragging } = useResizeHandle({
     orientation: 'horizontal',
     onDragStart: () => {
-      // The dock overlays the body, so its height is a % of the whole content
-      // column (its positioned parent). One read at drag start anchors the move.
+      // Fresh measurement at drag start: the squeezable area (body + dock) is
+      // invariant while the divider moves, so one read anchors the whole drag.
       const dock = dockRef.current
       const column = dock?.parentElement
       if (!dock || !column?.clientHeight) return false
@@ -68,19 +72,20 @@ export function TerminalDock({ hidden = false }: { hidden?: boolean }) {
   return (
     <div
       ref={dockRef}
-      // Overlay: absolutely pinned to the bottom of the content column so opening
-      // slides the panel *over* the body instead of squeezing it. The height (a %
-      // of the column) animates the slide; bg is opaque so the body never shows
-      // through.
-      className={`absolute inset-x-0 bottom-0 z-10 flex min-h-0 flex-col bg-surface ${
-        dragging ? 'transition-none' : 'transition-[height] ease-[ease]'
+      // Flex sibling of the body: opening grows this element (squeezing the agent
+      // pane via flex-grow) instead of overlaying it. The bar sits between the
+      // body and the status bar; the panel can be dragged up to (near) the top.
+      className={`flex min-h-0 flex-col bg-surface ${
+        dragging ? 'transition-none' : 'transition-[flex-grow] ease-[ease]'
       }`}
       style={
         {
           display: hidden ? 'none' : undefined,
           transitionDuration: `${TERMINAL_PANEL_ANIM_MS}ms`,
-          // Closed: just the bar. Open: a share of the column, overlaying the body.
-          height: open ? `${clampTerminalPanelPct(pct)}%` : '40px'
+          // Closed: exactly the bar (40px). Open: grow to the persisted total
+          // dock share; minHeight preserves the divider + bar chrome.
+          flex: open ? `${grow} 1 0px` : '0 0 40px',
+          minHeight: open ? '41px' : undefined
         } as CSSProperties
       }
     >

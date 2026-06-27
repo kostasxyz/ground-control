@@ -69,15 +69,16 @@ export default function App() {
         <div className="flex min-h-0 flex-1">
           <Suspense fallback={null}>
             {workspaceLoaded && <IconRail hidden={view !== 'workspace' ? true : undefined} />}
-            {/* relative: positioning context for the terminal-dock overlay.
-                pb-10 (workspace only) reserves the collapsed bar's height so the
-                body never sits under it; the dock then slides up *over* the body. */}
-            <div
-              className={`relative flex min-h-0 flex-1 flex-col${
-                view === 'workspace' ? ' pb-10' : ''
-              }`}
-            >
-              <div className="flex min-h-0 flex-1" data-app-body>
+            {/* The body and the terminal dock are flex siblings in this column.
+                Opening the dock grows it via flex-grow and squeezes the agent pane
+                (which resizes its height), instead of overlaying it. The panel can
+                be dragged up to (near) the top. */}
+            <div className="flex min-h-0 flex-1 flex-col">
+              {/* overflow-hidden clips the body's content (sessions pane, its
+                  scrollbar) to its own box so nothing bleeds over the terminal
+                  dock below — the dock now sits beside the body as a flex sibling
+                  instead of overlaying it. */}
+              <div className="flex min-h-0 flex-1 overflow-hidden" data-app-body>
                 {workspaceLoaded && <ContentSplit hidden={view !== 'workspace' ? true : undefined} />}
                 {view === 'settings' && <SettingsPage />}
                 {view === 'gitDiff' && <GitDiffViewer />}
