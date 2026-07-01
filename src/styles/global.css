@@ -90,6 +90,27 @@
   font-family: var(--stencil-font);
   letter-spacing: 0.1em;
 }
+/* Pane header row (SessionsPane + ConsolePane): the panes sit side by side in
+   ContentSplit, so their headers must stay the same height — one recipe, not
+   two hand-copied class strings. min-height, not a fixed h-8: the titles use
+   user-scalable font sizes (--font-heading-size / --font-body-size via
+   applyAppearance), and the row tops the pane flush against data-app-body's
+   overflow-hidden edge, so a fixed height clips ascenders once a title's line
+   box (font-size × inherited 1.5 line-height) outgrows it. The +1px keeps the
+   border-bottom from eating into the content box at the growth threshold; the
+   hairline itself delineates content scrolling beneath the row. */
+@utility pane-header {
+  display: flex;
+  min-height: max(
+    calc(var(--spacing) * 8),
+    calc(var(--text-heading-sm) * 1.5 + 1px),
+    calc(var(--text-body) * 1.5 + 1px)
+  );
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+}
 
 /* ============================================================ base ====== */
 html,

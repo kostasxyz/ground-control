@@ -54,7 +54,7 @@ export function SessionsPane() {
     <div className={paneClass}>
       <NewSessionDialog />
 
-      <div className="flex h-8 shrink-0 items-center justify-between gap-3 px-4">
+      <div className="pane-header gap-3 px-4">
         <h2 className="min-w-0 truncate font-display text-heading-sm font-bold text-orange">
           {project.name}
         </h2>

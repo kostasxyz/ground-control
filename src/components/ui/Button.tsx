@@ -15,7 +15,7 @@ const dialogBase =
   'h-7 cursor-pointer rounded-md border-[0.5px] border-line bg-orange/5 px-3.5 text-body-sm font-semibold text-cream transition-all duration-150 hover:not-disabled:border-orange hover:not-disabled:bg-orange/12 focus-visible:not-disabled:border-orange focus-visible:not-disabled:bg-orange/12 focus-visible:outline-none disabled:cursor-default disabled:opacity-45'
 
 const variants = {
-  ctrl: 'flex h-7 cursor-pointer items-center gap-[7px] rounded-md border-[0.5px] border-line bg-orange/5 px-2.5 text-body-sm font-semibold text-cream transition-all duration-150 hover:not-disabled:border-orange hover:not-disabled:bg-orange/13 hover:not-disabled:text-orange-bright disabled:cursor-default disabled:opacity-55',
+  ctrl: 'flex h-7 cursor-pointer items-center gap-[7px] rounded-md border-[0.5px] border-line bg-orange/5 px-2.5 text-body-sm font-semibold text-cream transition-all duration-150 hover:not-disabled:border-orange hover:not-disabled:bg-orange/13 hover:not-disabled:text-orange-bright focus-visible:not-disabled:border-orange focus-visible:not-disabled:bg-orange/13 focus-visible:not-disabled:text-orange-bright focus-visible:outline-none disabled:cursor-default disabled:opacity-55',
   primary:
     'inline-flex cursor-pointer items-center gap-1.5 rounded-md border-[0.5px] border-orange bg-orange/13 px-[13px] py-[5px] text-body-sm font-semibold text-orange-bright transition-all duration-150 hover:not-disabled:bg-orange/20 disabled:cursor-default disabled:opacity-45',
   dialog: dialogBase,

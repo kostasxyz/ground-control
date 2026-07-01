@@ -57,7 +57,7 @@ export function ConsolePane() {
 
   return (
     <div className="flex min-w-0 flex-1 flex-col">
-      <div className="flex h-8 shrink-0 items-center justify-between border-b border-line pr-3 pl-4">
+      <div className="pane-header pr-3 pl-4">
         <div className={`truncate text-body font-semibold${active ? ' glow-orange' : ''}`}>
           {active ? active.title : 'No session selected'}
         </div>
