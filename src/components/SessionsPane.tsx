@@ -54,10 +54,7 @@ export function SessionsPane() {
     <div className={paneClass}>
       <NewSessionDialog />
 
-      <div className="pane-header gap-3 px-4">
-        <h2 className="min-w-0 truncate font-display text-heading-sm font-bold text-orange">
-          {project.name}
-        </h2>
+      <div className="pane-header justify-end px-4">
         <Button
           variant="ctrl"
           onClick={openNewSession}

@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { useStore } from '@/state/store'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { Titlebar } from '@/components/Titlebar'
+import { WorkspaceBar } from '@/components/WorkspaceBar'
 import { WelcomePage } from '@/components/WelcomePage'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { StatusBar } from '@/components/StatusBar'
@@ -63,6 +64,10 @@ export default function App() {
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden bg-linear-to-b/srgb from-surface-2 to-surface">
         <div className="grain" />
         <Titlebar />
+        {/* Full-width workspace controls bar (project switcher + per-project git
+            controls). Shown in the workspace and git-diff views; the git block
+            inside only renders once a project is active. */}
+        {workspaceLoaded && (view === 'workspace' || view === 'gitDiff') && <WorkspaceBar />}
         {/* The rail spans the full height between titlebar and status bar; the
             body + terminal dock stack in a column to its right so the dock never
             extends under the rail's column. */}
