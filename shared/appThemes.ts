@@ -3,9 +3,9 @@
 import type { ColorScheme } from './theme'
 import type { TerminalThemeId } from './terminalThemes'
 
-export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light' | 'synthwave' | 'github-dark' | 'dark-forrest'
+export type AppThemeId = 'ground-control-dark' | 'ground-control-light' | 'ayu-dark' | 'rose-pine' | 'rose-pine-dawn' | 'matrix' | 'claude' | 'claude-dark' | 'nord' | 'nord-light' | 'synthwave' | 'github-dark' | 'dark-forrest' | 'abobe'
 
-export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord' | 'synthwave' | 'github' | 'dark-forrest'
+export type AppThemeFamily = 'ground-control' | 'ayu' | 'rose-pine' | 'matrix' | 'claude' | 'nord' | 'synthwave' | 'github' | 'dark-forrest' | 'abobe'
 
 export const APP_THEME_ORDER = [
   'ground-control-dark',
@@ -20,7 +20,8 @@ export const APP_THEME_ORDER = [
   'nord-light',
   'synthwave',
   'github-dark',
-  'dark-forrest'
+  'dark-forrest',
+  'abobe'
 ] as const satisfies readonly AppThemeId[]
 
 export const DEFAULT_APP_THEME_ID: AppThemeId = 'ground-control-dark'
@@ -155,6 +156,17 @@ const APP_THEMES: Record<AppThemeId, AppTheme> = {
     scheme: 'dark',
     terminalPair: 'claude-dark',
     surface: '#0c100e'
+  },
+  // Abobe — a neutral desaturated gray palette echoing Adobe Photoshop's medium
+  // gray UI: flat mid-dark grays, light-gray text, Adobe blue (#2680EB) accent.
+  // Dark-only, so pairedAppTheme() keeps it when the OS flips to light. Pairs
+  // with the matching 'abobe' neutral-gray terminal palette.
+  abobe: {
+    label: 'Abobe',
+    family: 'abobe',
+    scheme: 'dark',
+    terminalPair: 'abobe',
+    surface: '#383838'
   }
 }
 

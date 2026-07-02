@@ -17,6 +17,7 @@ export type TerminalThemeId =
   | 'nord-light'
   | 'synthwave'
   | 'github-dark'
+  | 'abobe'
 export const TERMINAL_THEME_ORDER = [
   'ember-dark',
   'ember-light',
@@ -31,7 +32,8 @@ export const TERMINAL_THEME_ORDER = [
   'nord',
   'nord-light',
   'synthwave',
-  'github-dark'
+  'github-dark',
+  'abobe'
 ] as const satisfies readonly TerminalThemeId[]
 
 export const DEFAULT_TERMINAL_THEME_ID: TerminalThemeId = 'ember-dark'
@@ -76,7 +78,8 @@ const TERMINAL_THEME_LABELS: Record<TerminalThemeId, string> = {
   nord: 'Nord',
   'nord-light': 'Nord Light',
   synthwave: 'Synthwave',
-  'github-dark': 'GitHub Dark'
+  'github-dark': 'GitHub Dark',
+  abobe: 'Abobe'
 }
 
 const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
@@ -421,6 +424,33 @@ const TERMINAL_PALETTES: Record<TerminalThemeId, TerminalPalette> = {
     brightMagenta: '#db61a2',
     brightCyan: '#2b7489',
     brightWhite: '#ffffff'
+  },
+  // Abobe — neutral desaturated gray palette matching Adobe Photoshop's medium
+  // gray UI. Flat gray canvas #1E1E1E, light-gray foreground #D4D4D4, Adobe
+  // blue #2680EB cursor/selection. Dark-only (app-theme 'abobe' pairs here).
+  abobe: {
+    background: '#1e1e1e',
+    foreground: '#d4d4d4',
+    cursor: '#2680eb',
+    cursorAccent: '#1e1e1e',
+    selectionBackground: 'rgba(38, 128, 235, 0.30)',
+    selectionForeground: '#ffffff',
+    black: '#1e1e1e',
+    red: '#e34850',
+    green: '#33ab84',
+    yellow: '#e8a91d',
+    blue: '#2680eb',
+    magenta: '#9256d9',
+    cyan: '#5cc2d6',
+    white: '#c8c8c8',
+    brightBlack: '#6e6e6e',
+    brightRed: '#ec5b62',
+    brightGreen: '#3fbf94',
+    brightYellow: '#f2b83a',
+    brightBlue: '#4b96f0',
+    brightMagenta: '#a36fe0',
+    brightCyan: '#6fcede',
+    brightWhite: '#f0f0f0'
   }
 }
 
